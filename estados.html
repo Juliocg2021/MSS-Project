@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Estado de ventas</title>
+  <link rel="stylesheet" href="plugins/bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css">
   <link rel="stylesheet" href="css/menustyle.css">
   <link rel="stylesheet" href="css/estadosstyle.css">
@@ -38,6 +39,101 @@
 
     <h1>Estados de ventas</h1> <!---arranque a escribir codigo aqui-->
 
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Id</th>
+            <th scope="col">Inicio</th>
+            <th scope="col">Pago</th>
+            <th scope="col">Descripción</th>
+            <th scope="col">Total</th>
+            <th scope="col">Estado</th>
+            <th scope="col">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">10012</th>
+            <td>19/09/2021</td>
+            <td>25/09/2021</td>
+            <td>Paquete 100 tornillos de ensamble x 50</td>
+            <td>400000</td>
+            <td class="">Creación</td>
+            <td>
+              <button class="btn btn-success" data-toggle="modal" data-target="#ModalEditar">Editar</button>
+              <button class="btn btn-danger">Borrar</button>  
+            </td>
+          </tr>
+          
+
+          <tr>
+            <th scope="row">10011</th>
+            <td>20/09/2021</td>
+            <td>22/09/2021</td>
+            <td>Teja Zinc Lisa Calibre 34 x 5</td>
+            <td>260000</td>
+            <td>Embalaje</td>
+            <td>
+              <button class="btn btn-success" data-toggle="modal" data-target="#ModalEditar">Editar</button>
+              <button class="btn btn-danger">Borrar</button>
+            </td>
+          </tr>
+
+          <tr>
+            <th scope="row">10010</th>
+            <td>13/09/2021</td>
+            <td>14/09/2021</td>
+            <td>Canal Amazonas blanco 6 metros</td>
+            <td>200000</td>
+            <td>Completada</td>
+            <td>
+              <button class="btn btn-success" data-toggle="modal" data-target="#ModalEditar">Editar</button>
+              <button class="btn btn-danger">Borrar</button>  
+            </td>
+          </tr>
+    
+        </tbody>
+      </table>
+    </div>
+
+
+    <div class="modal fade" id="ModalEditar" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Editar venta</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+
+            <form>
+              <div class="form-group">
+                <label for="recipient-name" class="col-form-label">Estado de la venta: </label>
+                <select name="editarEstadoVenta" id="editarEstadoVenta">
+                  <option value="">Selecciona una opción</option>
+                  <option value="">Creación</option>
+                  <option value="">Embalaje</option>
+                  <option value="">Despacho</option>
+                  <option value="">Recepción</option>
+                  <option value="">Ubicación</option>
+                </select>
+            </div>
+            </form>
+            
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            <button type="button" class="btn btn-primary">Guardar cambios</button>
+          </div>
+        </div>
+      </div>
+    </div>
+        
+    
+
 
 
 
@@ -67,6 +163,12 @@
 
 
   </div>
+
+
+
+  <script src="plugins/jquery/jquery.min.js"></script>
+  <script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="plugins/bootstrap/js/bootstrap.min.js"></script>
 
 </body>
 </html>
