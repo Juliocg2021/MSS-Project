@@ -1,20 +1,34 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap');
-*{
+html{
+  box-sizing: border-box;
+  font-size: 62.5%; /*reset para rems 10px de 16px*/
+}
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+body{
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
+  font-size: 1.4rem;
+  line-height: 2;
   text-decoration: none;
   font-family: 'Poppins', sans-serif;
 }
+
+.contenedor{
+  width: 95%;
+  max-width: 120rem;
+  margin: 0 auto;
+}
+
 .wrapper{
   background: #051e49;
-  position: fixed;
   width: 100%;
 }
 .wrapper nav{
-  position: relative;
   display: flex;
-  max-width: calc(100% - 200px);
+  width: 95%;
+  max-width: 120rem;
   margin: 0 auto;
   height: 70px;
   align-items: center;
@@ -33,6 +47,13 @@ nav .content .links{
   font-size: 30px;
   font-weight: 600;
 }
+
+.content .logo img{
+  vertical-align: middle;
+}
+
+
+
 .content .links li{
   list-style: none;
   line-height: 70px;
@@ -40,6 +61,7 @@ nav .content .links{
 .content .links li a,
 .content .links li label{
   color: #fff;
+  text-decoration: none;
   font-size: 18px;
   font-weight: 500;
   padding: 9px 17px;
@@ -52,8 +74,15 @@ nav .content .links{
 .content .links li a:hover,
 .content .links li label:hover{
   background: #323c4e;
+  color: rgb(233, 200, 139);
 }
+
+.item-active{
+  background: #323c4e;
+}
+
 .wrapper .search-icon,
+.wrapper .login-icon,
 .wrapper .menu-icon{
   color: #fff;
   font-size: 18px;
