@@ -6,18 +6,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Inicio</title>
-  <link rel="stylesheet" href="css/menustyle.css">
-  <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css">
+  <link rel="stylesheet" href="css/menustyle.css" type="text/css">
+  <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css" tyep="text/css">
 </head>
 <body>
+  <!--Menu-->
   <div class="wrapper">
     <nav>
-      <input type="checkbox" id="show-search">
-      <input type="checkbox" id="show-menu">
-      <label for="show-menu" class="menu-icon"><i class="fas fa-bars"></i></label>
+      <!--el boton menu ||| -->
+      <div class = "menulll">
+        <input type="checkbox" id="show-menu">
+        <label for="show-menu" class="menu-icon"><i class="fas fa-bars"></i></label>
+      </div>
+      <!--Menu de opciones-->
       <div class="content">
-      <div class="logo">
-        <a href="index.html"><img src="images/logomenu.png" height="60" width="200"></div></a>
+      <div class="logo"><a href="index.html"><img src="images/logomenu.png" height="60" width="200"></a></div>
         <ul class="links">
           <li><a href="ventas.html">Ventas</a></li>
           <li><a href="estados.html">Estados de Ventas</a></li>
@@ -26,13 +29,19 @@
           <li><a href="login.html" class="login-icon"><i class="fas fa-sign-in-alt"></i></a></li>
           </ul>
       </div>
-      <label for="show-search" class="search-icon"><i class="fas fa-search"></i></label>
+      <!--Lupa-->
+      <div class="lupa">
+        <input type="checkbox" id="show-search">
+        <label for="show-search" class="search-icon"><i class="fas fa-search"></i></label>
+      </div>
+      <!--Ventana de busqueda emergente al presionar la lupa-->
       <form action="#" class="search-box">
         <input type="text" placeholder="Escriba lo que desea buscar..." required>
         <button type="submit" class="go-icon"><i class="fas fa-long-arrow-alt-right"></i></button>
       </form>
     </nav>
   </div>
+  <!--Una nueva seccion para poner lo que queramos...-->
   <div class="dummy-text">
     <h2>BIENVENIDO A MSS</h2>
     <h2>SISTEMA DE VENTAS DE MANUFACTURA</h2>
