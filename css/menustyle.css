@@ -40,6 +40,8 @@ nav .content{
   align-items: center;
 }
 nav .content .links{
+  margin-top: auto !important;
+  margin-bottom: auto !important;
   margin-left: 80px;
   display: flex;
 }
