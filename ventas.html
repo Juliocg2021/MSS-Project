@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Ventas</title>
+  <link rel="stylesheet" href="plugins/bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css">
   <link rel="stylesheet" href="css/menustyle.css">
   <link rel="stylesheet" href="css/ventasstyle.css">
@@ -40,34 +41,55 @@
   <div class="contenedor">
 
     <h1>Ventas</h1> <!---arranque a escribir codigo aqui-->
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Id</th>
+            <th scope="col">Fecha Inicial</th>
+            <th scope="col">Fecha de Pago</th>
+            <th scope="col">Responsable</th>
+            <th scope="col">Descripción</th>
+            <th scope="col">Total</th>
+            <th scope="col">Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">1954</th>
+            <td>18/09/2021</td>
+            <td>20/09/2021</td>
+            <td>Jennifer Monroy</td>
+            <td>Paquete 100 tornillos de ensamble x 50</td>
+            <td>400000</td>
+            <td class="">Creación</td>
+          </tr>
+      
+          <tr>
+            <th scope="row">1001</th>
+            <td>17/09/2021</td>
+            <td>19/09/2021</td>
+            <td>Juan Sebastian Rodriguez</td>
+            <td>Teja Zinc Lisa Calibre 34 x 5</td>
+            <td>260000</td>
+            <td>Embalaje</td>
+          </tr>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+          <tr>
+            <th scope="row">2001</th>
+            <td>13/09/2021</td>
+            <td>14/09/2021</td>
+            <td>Jhon Edinson Cruz</td>
+            <td>Canal Amazonas blanco 6 metros</td>
+            <td>200000</td>
+            <td>Completada</td>
+          </tr>
+         </tbody>
+      </table>
   </div>
-
-</body>
-</html>
+    <script src="plugins/jquery/jquery.min.js"></script>
+    <script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="plugins/bootstrap/js/bootstrap.min.js"></script>
+  
+  </body>
+  </html>
