@@ -26,6 +26,7 @@ body{
   width: 100%;
 }
 .wrapper nav{
+  position: relative;
   display: flex;
   width: 95%;
   max-width: 120rem;
