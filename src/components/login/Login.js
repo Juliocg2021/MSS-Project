@@ -4,8 +4,6 @@ import { Link } from 'react-router-dom'
 import logoLogin from '../img/logologin.png'
 import './Login.css'
 
-
-
 export default class Login extends Component {
     render() {
         return (
