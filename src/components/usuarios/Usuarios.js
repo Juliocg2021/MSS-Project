@@ -191,7 +191,7 @@ const optionsEstado = [
     
             <Modal className="modal-usuarios" isOpen={this.state.modalActualizar} >
                 <ModalHeader>
-                <div><h3>Editar usuario</h3></div>
+                <div><h3>Editar Usuario</h3></div>
                 </ModalHeader>
     
                 <ModalBody>
@@ -292,7 +292,7 @@ const optionsEstado = [
     
             <Modal className="modal-usuarios"  isOpen={this.state.modalInsertar}>
                 <ModalHeader>
-                <div><h3>Insertar usuario</h3></div>
+                <div><h3>Insertar Usuario</h3></div>
                 </ModalHeader>
     
                 <ModalBody>
