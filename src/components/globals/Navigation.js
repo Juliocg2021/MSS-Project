@@ -19,7 +19,7 @@ export default class Navigation extends Component {
                 <input type="checkbox" id="show-menu" />
                 <label htmlFor="show-menu" className="menu-icon"><FontAwesomeIcon icon={faBars} /></label>
                 <div className="content">
-                    <div className="logo"><a href="index.html"><img src= {logomenu} alt="logo" /></a></div>
+                    <div className="logo"><img src= {logomenu} alt="logo" /></div>
                     <ul className="links">
                     <li><Link to="/">Inicio</Link></li>
                     <li><Link to="/ventas">Ventas</Link></li>
