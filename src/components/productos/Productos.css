@@ -1,0 +1,14 @@
+.contenedor-productos,
+.contenedor-productos button {
+    font-size: 1.5rem;
+}
+
+
+.modal-productos,
+.modal-productos button,
+.modal-productos label,
+.modal-productos input,
+.modal-productos select {
+    font-size: 1.5rem;
+
+}
