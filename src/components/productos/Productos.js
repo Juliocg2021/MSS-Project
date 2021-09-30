@@ -210,7 +210,7 @@ class productos extends Component {
                     <label>
                     Estado:
                     </label>
-                    <select className="form-control" name="estado" value={this.state.value} onChange={this.handleChange}>
+                    <select className="form-select" name="estado" value={this.state.value} onChange={this.handleChange}>
                     <option value={this.state.form.estado}>{this.state.form.estado}</option>
                     {optionsEstado.map((option) => (
                     <option value={option.value}>{option.label}</option>
@@ -283,7 +283,7 @@ class productos extends Component {
                     <label>
                     Estado:
                     </label>
-                    <select className="form-control" name="rol" value={this.state.value} onChange={this.handleChange}>
+                    <select className="form-select" name="rol" value={this.state.value} onChange={this.handleChange}>
                     {optionsEstado.map((option) => (
                     <option value={option.value}>{option.label}</option>
                     ))}
