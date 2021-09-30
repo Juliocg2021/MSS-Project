@@ -152,7 +152,7 @@ const optionsEstado = [
             <Container className="mt-5 contenedor contenedor-usuarios">
             <h1>Usuarios</h1>
             <br />
-                <Button color="success" onClick={()=>this.mostrarModalInsertar()}>Crear nuevo</Button>
+                <Button color="success" onClick={()=>this.mostrarModalInsertar()}>Crear Nuevo</Button>
                 <br />
                 <br />
                 <Table>
