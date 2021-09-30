@@ -1,0 +1,14 @@
+.contenedor-usuarios,
+.contenedor-usuarios button {
+    font-size: 1.5rem;
+}
+
+
+.modal-usuarios,
+.modal-usuarios button,
+.modal-usuarios label,
+.modal-usuarios input,
+.modal-usuarios select {
+    font-size: 1.5rem;
+
+}
