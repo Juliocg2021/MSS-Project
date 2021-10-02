@@ -4,6 +4,10 @@ import { Modal, Button, Form } from 'react-bootstrap';
 import ProductosAgg from './ProductosAgg.js';
 import ListaProductos from '../productos/ListaProductos.js';
 
+/*                    Id_producto: this.props.productos.Id_producto,
+                    descripcion: this.props.productos.descripcion,
+                    valor_unitario: this.props.productos.valor_unitario,
+                    cantidad: 0*/
 
 
 export default class ModalWindow extends Component {
@@ -17,37 +21,37 @@ export default class ModalWindow extends Component {
         this.handleValor = this.handleValor.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.state = {
-            show: false,
-            identificador: '',
-            valor: 0,
-            cantidad: 0,
-            productos: [{
-                Id_producto: '',
-                descripcion: '',
-                valor_unitario: 0,
-                estado: ''
-            }
-            ],
-            fecha: '',
-            identificacionCliente: '',
-            nombreCliente: '',
-            nombreVendedor: ''
+            ventas: {
+                identificador: '',
+                valor: 0,
+                productos: [],
+                fecha: '',
+                identificacionCliente: '',
+                nombreCliente: '',
+                nombreVendedor: '',
+                estadoVenta: '',
+            },
+            show: false
         }
+
     }
 
+
+
+
+
+
+
+
+
+
     handleChange(evento) {
-        const nombre = evento.target.name;
-        const valor = evento.target.value;
-        this.setState({
-            [nombre]: valor,
-        });
+        this.props.agregarNuevaVenta(evento)
     }
 
     handleClose() {
-        this.setState({
-            show: false
-        });
-    }
+        this.props.limpiarModal();
+}
 
     handleShow() {
         this.setState({
@@ -64,7 +68,7 @@ export default class ModalWindow extends Component {
             valor: total
         });
     }
-
+//
     handleAgregarProducto(productoNuevo) {
         this.setState({
             productos: [...this.state.productos, productoNuevo],
@@ -84,36 +88,29 @@ export default class ModalWindow extends Component {
         });
     }
 
-    handleSubmit(){
-        this.props.handleAgregarVenta(this.state)
+    handleSubmit() {
+        this.props.handleAgregarVenta()
+        this.props.limpiarModal();
+        this.props.handleClose();
+    }
+
+    editarCampos() {
         this.setState({
-            show: false,
-            identificador: '',
-            valor: 0,
-            cantidad: 0,
-            productos: [{
-                Id_producto: '',
-                descripcion: '',
-                valor_unitario: 0,
-                estado: ''
-            }
-            ],
-            fecha: '',
-            identificacionCliente: '',
-            nombreCliente: '',
-            nombreVendedor: ''
-        });
+            ventas: this.props.handleShowEditar
+        })
     }
 
     render() {
         //const [show, setShow] = useState(false);
-        const identificador = this.state.identificador;
-        const valor = this.state.valor;
-        const cantidad = this.state.cantidad;
-        const fecha = this.state.fecha;
-        const identificacionCliente = this.state.identificacionCliente;
-        const nombreCliente = this.state.nombreCliente;
-        const nombreVendedor = this.state.nombreVendedor;
+        var identificador = this.props.ventaEditar.identificador;
+        var valor = this.props.ventaEditar.valor;
+        var cantidad = this.props.ventaEditar.cantidad;
+        var fecha = this.props.ventaEditar.fecha;
+        var identificacionCliente = this.props.ventaEditar.identificacionCliente;
+        var nombreCliente = this.props.ventaEditar.nombreCliente;
+        var nombreVendedor = this.props.ventaEditar.nombreVendedor;
+        var estadoVenta = this.props.ventaEditar.estadoVenta;
+        
         return (
             <>
                 <Modal fullscreen={true} show={this.props.show} onHide={this.props.handleClose}>
@@ -135,8 +132,12 @@ export default class ModalWindow extends Component {
 
                             <p />
                             <Form.Group>
-                                <label for="recipient-name" class="col-form-label">Responsable: </label>
-                                <select name="editarresponsable" id="responsable">
+                                <label htmlFor="recipient-name" className="col-form-label">Responsable: </label>
+                                <select
+                                    name="nombreVendedor"
+                                    id="nombreVendedor"
+                                    value={nombreVendedor}
+                                    onChange={this.handleChange}>
                                     <option value="">Selecciona una opción</option>
                                     <option value="">Jennifer Monroy</option>
                                     <option value="">Yuliana Gaviria</option>
@@ -186,7 +187,7 @@ export default class ModalWindow extends Component {
                                     type="number"
                                     name="cantidad"
                                     id="cantidad"
-                                    readOnly
+                                    
                                     value={cantidad}
                                     onChange={this.handleChange} />
                             </Form.Group>
@@ -209,17 +210,22 @@ export default class ModalWindow extends Component {
 
                             <Form.Group>
                                 <Form.Label>Valor Total:</Form.Label>
-                                <Form.Control 
-                                type="number" 
-                                name="valor"
-                                readOnly 
-                                value={valor} />
+                                <Form.Control
+                                    type="number"
+                                    name="valor"
+                                    onChange={this.handleChange}
+                                    value={valor} />
                             </Form.Group>
                             <p />
 
                             <Form.Group className="mb-3" controlId="formBasicCheckbox">
-                                <label for="recipient-name" class="col-form-label">Estado de la venta: </label>
-                                <select name="editarEstadoVenta" id="editarEstadoVenta">
+                                <label htmlFor="recipient-name" className="col-form-label">Estado de la venta: </label>
+                                <select
+                                    name="estadoVenta"
+                                    id="estadoVenta"
+                                    value={estadoVenta}
+                                    onChange={this.handleChange}
+                                >
                                     <option value="">Selecciona una opción</option>
                                     <option value="">Creación</option>
                                     <option value="">Embalaje</option>
@@ -233,10 +239,10 @@ export default class ModalWindow extends Component {
                         </Form>
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button variant="secondary" onClick={this.handleClose}>
+                        <Button variant="secondary" onClick={this.props.handleClose}>
                             Cerrar
                         </Button>
-                        <Button variant="primary" onClick={this.handleClose} onClick={this.handleSubmit}>
+                        <Button variant="primary" onClick={this.handleSubmit}>
                             Guardar cambios
                         </Button>
                     </Modal.Footer>
