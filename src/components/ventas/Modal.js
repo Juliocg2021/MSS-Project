@@ -116,10 +116,7 @@ export default class ModalWindow extends Component {
         const nombreVendedor = this.state.nombreVendedor;
         return (
             <>
-                <Button variant="primary" onClick={this.handleShow}>
-                    + Nueva venta
-                </Button>
-                <Modal fullscreen={true} show={this.state.show} onHide={this.handleClose}>
+                <Modal fullscreen={true} show={this.props.show} onHide={this.props.handleClose}>
                     <Modal.Header closeButton>
                         <Modal.Title>Ingresar Nueva Venta</Modal.Title>
                     </Modal.Header>

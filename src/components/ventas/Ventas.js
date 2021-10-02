@@ -43,6 +43,8 @@ export default class Inicio extends Component {
         this.handleAgregarVenta = this.handleAgregarVenta.bind(this);
         this.eliminarVenta = this.eliminarVenta.bind(this);
         this.editarVenta = this.editarVenta.bind(this);
+        this.handleShow = this.handleShow.bind(this);
+        this.handleClose = this.handleClose.bind(this);
         this.state = {
             ventas: [
                 {
@@ -56,9 +58,9 @@ export default class Inicio extends Component {
                     nombreVendedor: 'vendedor1'
                 },
             ],
+            show: ''
         }
     };
-
     //agregarVenta = () => { };
 
     handleAgregarVenta(nuevaVenta) {
@@ -80,18 +82,23 @@ export default class Inicio extends Component {
     }
 
     editarVenta() {
-
     }
+
+
     handleShow() {
-        render() 
-        {render (<ModalWindow />)}
+        this.setState({
+            show: true
+        });
     }
-
     
+    handleClose() {
+        this.setState({
+            show: false
+        });
+    }
 
     render() {
         const ventas = this.state.ventas;
-
         return (
             <div className="contenedor-app">
                 <Navigation />
@@ -122,10 +129,16 @@ export default class Inicio extends Component {
                             editarVenta={this.editarVenta}  />
                         </tbody>
                     </table>
+                    <Button variant="primary" onClick={this.handleShow}>
+                    + Nueva venta
+                    </Button>
                     <ModalWindow 
                     datosVentas={this.state} 
                     handleAgregarVenta={this.handleAgregarVenta}
-                    ventas={this.state.ventas}  />
+                    ventas={this.state.ventas} 
+                    show={this.state.show}
+                    handleClose={this.handleClose}
+                    />
                 </div>
             </div>
         );
