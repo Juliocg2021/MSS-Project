@@ -7,6 +7,11 @@ import {
     Button
 } from "reactstrap";
 
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSearch } from "@fortawesome/free-solid-svg-icons";
+
+import './Ventas.css'
+
 
 function Venta(props) {
     const ventas = props.ventas.map(
@@ -237,6 +242,18 @@ export default class Inicio extends Component {
                         <p>Esta es la lista de ventas</p>
                     </main>
                     <p />
+                    <div className="barraBusqueda">
+                        <input
+                        type="text"
+                        placeholder="Buscar"
+                        className="textField"
+                        name="busqueda"
+                        />
+                        <button type="button" className="btnBuscar" /*onClick=*/>
+                        {" "}
+                        <FontAwesomeIcon icon={faSearch} />
+                        </button>
+                    </div>
                     <table className="table">
                         <thead>
                             <tr>
