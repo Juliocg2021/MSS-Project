@@ -1,10 +1,8 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
-
 import { faBars } from '@fortawesome/free-solid-svg-icons'
-import { faSearch } from '@fortawesome/free-solid-svg-icons'
 import { faSignInAlt } from '@fortawesome/free-solid-svg-icons'
-import { faArrowRight } from '@fortawesome/free-solid-svg-icons'
+
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
