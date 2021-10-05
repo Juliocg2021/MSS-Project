@@ -183,7 +183,7 @@ const optionsEstado = [
                     </label>
                     <input
                     className="form-control"
-                    type="text"
+                    type="number"
                     name="identificacion"
                     onChange={this.handleChange}
                     />
@@ -208,7 +208,7 @@ const optionsEstado = [
                     <input
                     className="form-control"
                     name="email"
-                    type="text"
+                    type="email"
                     onChange={this.handleChange}
                     />
                 </FormGroup>
@@ -290,7 +290,7 @@ const optionsEstado = [
                     className="form-control"
                     name="identificacion"
                     readOnly
-                    type="text"
+                    type="number"
                     onChange={this.handleChange} 
                     value={this.state.form && this.state.form.identificacion}
                     />
@@ -316,7 +316,7 @@ const optionsEstado = [
                     <input
                     className="form-control"
                     name="email"
-                    type="text"
+                    type="email"
                     onChange={this.handleChange} 
                     value={this.state.form && this.state.form.email}
                     />
