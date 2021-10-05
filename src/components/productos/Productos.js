@@ -3,7 +3,8 @@ import React, { Component } from 'react'
 import Navigation from '../globals/Navigation'
 import './Productos.css'
 import "bootstrap/dist/css/bootstrap.min.css";
-
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import {
   Table,
   Button,
@@ -29,22 +30,22 @@ const optionsEstado = [
     }
   ]
 
-class productos extends Component {
+class Productos extends Component {
     state = {
       data: [],
-      modalActualizar: false,
+      modalEditar: false,
       modalInsertar: false,
       form: {
-        Id_producto: "",
+        id_producto: "",
         descripcion: "",
-        valor_unitario: 0,
+        valor_unitario: "",
         estado: "",
       },
       id:0
     };
   
       peticionGet = () => {
-        fireDb.child("producto").on("value", (producto) => {
+        fireDb.child("productos").on("value", (producto) => {
           if (producto.val() !== null) {
             this.setState({ ...this.state.data, data: producto.val() });
           } else {
@@ -67,7 +68,7 @@ class productos extends Component {
           error=>{
             if(error)console.log(error)
           });
-          this.setState({modalActualizar: false});
+          this.setState({modalEditar: false});
       }
   
       peticionDelete=()=>{
@@ -92,7 +93,7 @@ class productos extends Component {
     
         await this.setState({form: producto, id: id});
     
-        (caso==="Editar")?this.setState({modalActualizar: true}):
+        (caso==="Editar")?this.setState({modalEditar: true}):
         this.peticionDelete()
     
       }
@@ -100,7 +101,7 @@ class productos extends Component {
       componentDidMount() {
         this.peticionGet();
       }
-  
+
       
       render() {
         
@@ -109,7 +110,19 @@ class productos extends Component {
           <Navigation />
               <>
               <Container className="mt-5 contenedor contenedor-productos">
-              <h1>productos</h1>
+              <h1>Productos</h1>
+              <div className="barraBusqueda">
+                        <input
+                        type="text"
+                        placeholder="Buscar"
+                        className="textField"
+                        name="busqueda"
+                        />
+                        <button type="button" className="btnBuscar" /*onClick=*/>
+                        {" "}
+                        <FontAwesomeIcon icon={faSearch} />
+                        </button>
+              </div>
               <br />
                 <button className="btn btn-success" onClick={()=>this.setState({modalInsertar: true})}>Insertar producto</button>
                   <br />
@@ -118,7 +131,7 @@ class productos extends Component {
   
                   <thead>
                     <tr>
-                      <th>Id Producto</th>
+                      <th>Id.Producto</th>
                       <th>Descripcion</th>
                       <th>Valor Unitario</th>
                       <th>Estado</th>
@@ -157,7 +170,7 @@ class productos extends Component {
   
                   <FormGroup>
                       <label>
-                      Id Producto: 
+                      Id.Producto: 
                       </label>
                       <input
                       className="form-control"
@@ -225,7 +238,7 @@ class productos extends Component {
   
   
       
-              <Modal className="modal-productos" isOpen={this.state.modalActualizar} >
+              <Modal className="modal-productos" isOpen={this.state.modalEditar} >
   
                   <ModalHeader>
   
@@ -237,7 +250,7 @@ class productos extends Component {
   
                   <FormGroup>
                       <label>
-                      Id Producto:
+                      Id.Producto:
                       </label>
                       <input
                       className="form-control"
@@ -299,7 +312,7 @@ class productos extends Component {
                   </Button>
                   <Button
                       color="danger"
-                      onClick={()=>this.setState({modalActualizar: false})}
+                      onClick={()=>this.setState({modalEditar: false})}
                   >
                       Cancelar
                   </Button>
@@ -315,4 +328,4 @@ class productos extends Component {
         );
       }
     }
-    export default productos;
+    export default Productos;
