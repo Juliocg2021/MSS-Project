@@ -14,16 +14,7 @@ import {
   ModalFooter,
 } from "reactstrap";
 
-
-//Objeto de usuarios (simulador de base de datos)
-const data = [
-    { id: 1, nombre: "Jenniffer Monroy", email: "jenniferm@gmail.com", password: "jenniffer123", rol:"Administrador", estado: "Autorizado" },
-    { id: 2, nombre: "Julio Gutierrez", email: "juliog@gmail.com", password: "julio123", rol:"Administrador", estado: "Autorizado" },
-    { id: 3, nombre: "Yuliana Gaviria", email: "yulianag@gmail.com", password: "yuliana123", rol:"Vendedor", estado: "Autorizado" },
-    { id: 4, nombre: "Sebastián Rodríguez", email: "sebastianr@gmail.com", password: "sebas123", rol:"Vendedor", estado: "Autorizado" },
-    { id: 5, nombre: "John Edison Cruz", email: "johncruz@gmail.com", password: "john123", rol:"Vendedor", estado: "NoAutorizado" },  
-  ];
-
+import fireDb from '../../firebase';
 
 //Opciones para select de rol
 const optionsRol = [
@@ -56,93 +47,81 @@ const optionsEstado = [
 
 
   class Usuarios extends Component {
+
     state = {
-      data: data,
-      modalActualizar: false,
+      data: [],
+      modalEditar: false,
       modalInsertar: false,
-      form: {
-        id: "",
+      form:{
+        identificacion: "",
         nombre: "",
         email: "",
         password: "",
         rol: "",
         estado: "",
       },
+      id: 0
     };
-  
-    mostrarModalActualizar = (dato) => {
-      this.setState({
-        form: dato,
-        modalActualizar: true,
-      });
-    };
-  
-    cerrarModalActualizar = () => {
-      this.setState({ modalActualizar: false });
-    };
-  
-    mostrarModalInsertar = () => {
-      this.setState({
-        modalInsertar: true,
-      });
-    };
-  
-    cerrarModalInsertar = () => {
-      this.setState({ modalInsertar: false });
-    };
-  
-    editar = (dato) => {
-      var contador = 0;
-      var arreglo = this.state.data;
-      
-      arreglo.map((registro) => {
-        if (dato.id === registro.id) {
-            arreglo[contador].nombre = dato.nombre;
-            arreglo[contador].email = dato.email;
-            arreglo[contador].password = dato.password;
-            arreglo[contador].rol = dato.rol;
-            arreglo[contador].estado = dato.estado;
+
+    peticionGet = () => {
+      fireDb.child("usuarios").on("value", (usuario) => {
+        if (usuario.val() !== null) {
+          this.setState({ ...this.state.data, data: usuario.val() });
+        } else {
+          this.setState({ data: [] });
         }
-        contador++;
-      }); 
-      this.setState({ data: arreglo, modalActualizar: false });
-      window.alert("Se ha editado el elemento: "+dato.id);
+      });
     };
-  
-    eliminar = (dato) => {
-      var opcion = window.confirm("¿Deseas eliminar el elemento id: "+dato.id+"?");
-      if (opcion === true) {
-        var contador = 0;
-        var arreglo = this.state.data;
-        arreglo.map((registro) => {
-          if (dato.id === registro.id) {
-            arreglo.splice(contador, 1);
-          }
-          contador++;
+
+    peticionPost=()=>{
+      fireDb.child("usuarios").push(this.state.form,
+        error=>{
+          if(error)console.log(error)
         });
-        this.setState({ data: arreglo, modalActualizar: false });
-        window.alert("Se ha eliminado el elemento: "+dato.id);
+        this.setState({modalInsertar: false});
+    }
+
+    peticionPut=()=>{
+      fireDb.child(`usuarios/${this.state.id}`).set(
+        this.state.form,
+        error=>{
+          if(error)console.log(error)
+        });
+        this.setState({modalEditar: false});
+    }
+
+    peticionDelete=()=>{
+      if(window.confirm(`Estás seguro que deseas eliminar el usuario ${this.state.form && this.state.form.canal}?`))
+      {
+        fireDb.child(`usuarios/${this.state.id}`).remove(
+        error=>{
+          if(error)console.log(error)
+        });
       }
-    };
-  
-    insertar= ()=>{
-      var valorNuevo= {...this.state.form};
-      valorNuevo.id=this.state.data[data.length - 1].id + 1;
-      var lista= this.state.data;
-      lista.push(valorNuevo);
-      this.setState({ modalInsertar: false, data: lista });
-      window.alert("Se ha insertado el elemento: "+valorNuevo.id);
     }
   
-    handleChange = (e) => {
-      this.setState({
-        form: {
-          ...this.state.form,
-          [e.target.name]: e.target.value,
-        },
-      });
-    };
+    handleChange=e=>{
+      this.setState({form:{
+        ...this.state.form,
+        [e.target.name]: e.target.value
+      }})
+      console.log(this.state.form);
+    }
   
+    seleccionarUsuario=async(usuario, id, caso)=>{
+  
+      await this.setState({form: usuario, id: id});
+  
+      (caso==="Editar")?this.setState({modalEditar: true}):
+      this.peticionDelete()
+  
+    }
+  
+    componentDidMount() {
+      this.peticionGet();
+    }
+
+    
     render() {
       
       return (
@@ -152,58 +131,61 @@ const optionsEstado = [
             <Container className="mt-5 contenedor contenedor-usuarios">
             <h1>Usuarios</h1>
             <br />
-                <Button color="success" onClick={()=>this.mostrarModalInsertar()}>Crear Nuevo</Button>
+              <button className="btn btn-success" onClick={()=>this.setState({modalInsertar: true})}>Insertar usuario</button>
                 <br />
                 <br />
                 <Table>
+
                 <thead>
-                    <tr>
-                    <th>Id</th>
+                  <tr>
+                    <th>Identificación</th>
                     <th>Nombre</th>
                     <th>Email</th>
                     <th>Rol</th>
                     <th>Estado</th>
-                    </tr>
+                    <th>Acciones</th>
+                  </tr>
                 </thead>
-    
+                
                 <tbody>
-                    {this.state.data.map((dato) => (
-                    <tr key={dato.id}>
-                        <td>{dato.id}</td>
-                        <td>{dato.nombre}</td>
-                        <td>{dato.email}</td>
-                        <td>{dato.rol}</td>
-                        <td>{dato.estado}</td>
-                        <td>
-                        <Button
-                            color="primary"
-                            onClick={() => this.mostrarModalActualizar(dato)}
-                        >
-                            Editar
-                        </Button>{" "}
-                        <Button color="danger" onClick={()=> this.eliminar(dato)}>Eliminar</Button>
-                        </td>
+                  {Object.keys(this.state.data).map(i=>{
+          
+                    return <tr key={i}>
+                      <td>{this.state.data[i].identificacion}</td>
+                      <td>{this.state.data[i].nombre}</td>
+                      <td>{this.state.data[i].email}</td>
+                      <td>{this.state.data[i].rol}</td>
+                      <td>{this.state.data[i].estado}</td>
+                      <td>
+                        <button className="btn btn-primary" onClick={()=>this.seleccionarUsuario(this.state.data[i], i, 'Editar')}>Editar</button> {"   "}
+                        <button className="btn btn-danger" onClick={()=>this.seleccionarUsuario(this.state.data[i], i, 'Eliminar')}>Eliminar</button>
+                      </td>
                     </tr>
-                    ))}
+                  })}
                 </tbody>
+
                 </Table>
             </Container>
-    
-            <Modal className="modal-usuarios" isOpen={this.state.modalActualizar} >
+
+            <Modal className="modal-usuarios" isOpen={this.state.modalInsertar}>
+
                 <ModalHeader>
-                <div><h3>Editar Usuario</h3></div>
+
+                <div><h3>Insertar usuario nuevo</h3></div>
+
                 </ModalHeader>
     
                 <ModalBody>
+
                 <FormGroup>
                     <label>
-                    Id:
+                    Identificación: 
                     </label>
                     <input
                     className="form-control"
-                    readOnly
                     type="text"
-                    value={this.state.form.id}
+                    name="identificacion"
+                    onChange={this.handleChange}
                     />
                 </FormGroup>
                 
@@ -216,7 +198,6 @@ const optionsEstado = [
                     name="nombre"
                     type="text"
                     onChange={this.handleChange}
-                    value={this.state.form.nombre}
                     />
                 </FormGroup>
 
@@ -229,7 +210,6 @@ const optionsEstado = [
                     name="email"
                     type="text"
                     onChange={this.handleChange}
-                    value={this.state.form.email}
                     />
                 </FormGroup>
 
@@ -242,7 +222,6 @@ const optionsEstado = [
                     name="password"
                     type="password"
                     onChange={this.handleChange}
-                    value={this.state.form.password}
                     />
                 </FormGroup>
 
@@ -250,7 +229,118 @@ const optionsEstado = [
                     <label>
                     Rol:
                     </label>
-                    <select className="form-select" name="rol" value={this.state.value} onChange={this.handleChange}>
+                    <select className="form-select" name="rol" onChange={this.handleChange}>
+                    {optionsRol.map((option) => (
+                    <option value={option.value}>{option.label}</option>
+                    ))}
+                    </select>
+                   
+                   
+                </FormGroup>
+
+                <FormGroup>
+                    <label>
+                    Estado:
+                    </label>
+                    <select className="form-select" name="estado" onChange={this.handleChange}>
+                    {optionsEstado.map((option) => (
+                    <option value={option.value}>{option.label}</option>
+                    ))}
+                    </select>
+                </FormGroup>
+              
+                </ModalBody>
+    
+                <ModalFooter>
+
+                <Button
+                    color="primary"
+                    onClick={()=>this.peticionPost()}
+                >
+                    Insertar
+                </Button>
+                <Button
+                    className="btn btn-danger"
+                    onClick={()=>this.setState({modalInsertar: false})}
+                >
+                    Cancelar
+                </Button>
+
+                </ModalFooter>
+
+            </Modal>
+
+
+    
+            <Modal className="modal-usuarios" isOpen={this.state.modalEditar} >
+
+                <ModalHeader>
+
+                <div><h3>Editar Usuario</h3></div>
+
+                </ModalHeader>
+    
+                <ModalBody>
+
+                <FormGroup>
+                    <label>
+                    Identificación:
+                    </label>
+                    <input
+                    className="form-control"
+                    name="identificacion"
+                    readOnly
+                    type="text"
+                    onChange={this.handleChange} 
+                    value={this.state.form && this.state.form.identificacion}
+                    />
+                </FormGroup>
+                
+                <FormGroup>
+                    <label>
+                    Nombre: 
+                    </label>
+                    <input
+                    className="form-control"
+                    name="nombre"
+                    type="text"
+                    onChange={this.handleChange} 
+                    value={this.state.form && this.state.form.nombre}
+                    />
+                </FormGroup>
+
+                <FormGroup>
+                    <label>
+                    Email:
+                    </label>
+                    <input
+                    className="form-control"
+                    name="email"
+                    type="text"
+                    onChange={this.handleChange} 
+                    value={this.state.form && this.state.form.email}
+                    />
+                </FormGroup>
+
+                <FormGroup>
+                    <label>
+                    Password:
+                    </label>
+                    <input
+                    className="form-control"
+                    name="password"
+                    type="password"
+                    onChange={this.handleChange} 
+                    value={this.state.form && this.state.form.password}
+                    
+                    />
+                </FormGroup>
+
+                <FormGroup>
+                    <label>
+                    Rol:
+                    </label>
+                    <select className="form-select" name="rol" value={this.state.form && this.state.form.rol} onChange={this.handleChange}>
                     <option value={this.state.form.rol}>{this.state.form.rol}</option>
                     {optionsRol.map((option) => (
                     <option value={option.value}>{option.label}</option>
@@ -263,7 +353,7 @@ const optionsEstado = [
                     <label>
                     Estado:
                     </label>
-                    <select className="form-select" name="estado" value={this.state.value} onChange={this.handleChange}>
+                    <select className="form-select" name="estado" value={this.state.form && this.state.form.estado} onChange={this.handleChange}>
                     <option value={this.state.form.estado}>{this.state.form.estado}</option>
                     {optionsEstado.map((option) => (
                     <option value={option.value}>{option.label}</option>
@@ -274,118 +364,26 @@ const optionsEstado = [
                 </ModalBody>
     
                 <ModalFooter>
+
                 <Button
                     color="primary"
-                    onClick={() => this.editar(this.state.form)}
+                    onClick={()=>this.peticionPut()}
                 >
                     Editar
                 </Button>
                 <Button
                     color="danger"
-                    onClick={() => this.cerrarModalActualizar()}
+                    onClick={()=>this.setState({modalEditar: false})}
                 >
                     Cancelar
                 </Button>
+
                 </ModalFooter>
+
             </Modal>
 
     
-            <Modal className="modal-usuarios"  isOpen={this.state.modalInsertar}>
-                <ModalHeader>
-                <div><h3>Insertar Usuario</h3></div>
-                </ModalHeader>
-    
-                <ModalBody>
-                <FormGroup>
-                    <label>
-                    Id: 
-                    </label>
-                    <input
-                    className="form-control"
-                    readOnly
-                    type="text"
-                    value={this.state.data[data.length - 1].id + 1}
-                    />
-                </FormGroup>
-                
-                <FormGroup>
-                    <label>
-                    Nombre: 
-                    </label>
-                    <input
-                    className="form-control"
-                    name="nombre"
-                    type="text"
-                    onChange={this.handleChange}
-                    />
-                </FormGroup>
-
-                <FormGroup>
-                    <label>
-                    Email:
-                    </label>
-                    <input
-                    className="form-control"
-                    name="email"
-                    type="text"
-                    onChange={this.handleChange}
-                    />
-                </FormGroup>
-
-                <FormGroup>
-                    <label>
-                    Password:
-                    </label>
-                    <input
-                    className="form-control"
-                    name="password"
-                    type="password"
-                    onChange={this.handleChange}
-                    />
-                </FormGroup>
-
-                <FormGroup>
-                    <label>
-                    Rol:
-                    </label>
-                    <select className="form-select" name="rol" value={this.state.value} onChange={this.handleChange}>
-                    {optionsRol.map((option) => (
-                    <option value={option.value}>{option.label}</option>
-                    ))}
-                    </select>
-                   
-                   
-                </FormGroup>
-
-                <FormGroup>
-                    <label>
-                    Estado:
-                    </label>
-                    <select className="form-select" name="estado" value={this.state.value} onChange={this.handleChange}>
-                    {optionsEstado.map((option) => (
-                    <option value={option.value}>{option.label}</option>
-                    ))}
-                    </select>
-                </FormGroup>
-                
-                
-                </ModalBody>
-    
-                <ModalFooter>
-                <Button
-                    color="primary"
-                    onClick={() => this.insertar()}
-                >
-                    Insertar
-                </Button>
-                <Button
-                    className="btn btn-danger"
-                    onClick={() => this.cerrarModalInsertar()}
-                >
-                    Cancelar
-                </Button>
-                </ModalFooter>
-            </Modal>
+            
             </>
         </>
       );
