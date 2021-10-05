@@ -28,12 +28,6 @@ export default class Navigation extends Component {
                     <li><Link to="/login"><FontAwesomeIcon icon={faSignInAlt} /></Link></li>
                     </ul>
                  </div>
-                <input type="checkbox" id="show-search" />
-                <label htmlFor="show-search" className="search-icon"><FontAwesomeIcon icon={faSearch} /></label>
-                <form action="#" className="search-box">
-                    <input type="text" placeholder="Escriba lo que desea buscar..." required />
-                    <button type="submit" className="go-icon"><FontAwesomeIcon icon={faArrowRight} /></button>
-                </form>
             </nav>
         </div>
         )
