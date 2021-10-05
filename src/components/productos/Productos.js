@@ -174,7 +174,7 @@ class Productos extends Component {
                       </label>
                       <input
                       className="form-control"
-                      type={Number}
+                      type="number"
                       name="id_producto"
                       onChange={this.handleChange}
                       />
@@ -199,7 +199,7 @@ class Productos extends Component {
                       <input
                       className="form-control"
                       name="valor_unitario"
-                      type={Number}
+                      type="number"
                       onChange={this.handleChange}
                       />
                   </FormGroup>
@@ -256,7 +256,7 @@ class Productos extends Component {
                       className="form-control"
                       name="id_producto"
                       readOnly
-                      type={Number}
+                      type="number"
                       onChange={this.handleChange} 
                       value={this.state.form && this.state.form.id_producto}
                       />
@@ -282,7 +282,7 @@ class Productos extends Component {
                       <input
                       className="form-control"
                       name="valor_unitario"
-                      type={Number}
+                      type="number"
                       onChange={this.handleChange} 
                       value={this.state.form && this.state.form.valor_unitario}
                       />

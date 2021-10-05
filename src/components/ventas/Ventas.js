@@ -1,248 +1,127 @@
-import { render } from '@testing-library/react';
 import React, { Component } from 'react'
-
 import Navigation from '../globals/Navigation'
-import ModalWindow from './Modal.js'
-import {
-    Button
-} from "reactstrap";
-
+import './Ventas.css'
+import "bootstrap/dist/css/bootstrap.min.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
+import {
+  Table,
+  Button,
+  Container,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  FormGroup,
+  ModalFooter,
+} from "reactstrap";
 
-import './Ventas.css'
+import fireDb from '../../firebase';
 
+//Opciones para select de estado
+const optionsEstado = [
+    {
+        label: "En Proceso",
+        value: "En Proceso",
+    },
+    {
+        label: "Cancelada",
+        value: "Cancelada",
+    },
+    {
+    label: "Entregada",
+    value: "Entregada",
+    }
+  ]
 
-function Venta(props) {
-    const ventas = props.ventas.map(
-        (venta, indice) => {
-            return (
-                <tr key={indice}>
-                    <td>{venta.identificador}</td>
-                    <td>{venta.valor}</td>
-                    <td>{venta.fecha}</td>
-                    <td>{venta.identificacionCliente}</td>
-                    <td>{venta.nombreCliente}</td>
-                    <td>{venta.nombreVendedor}</td>
-                    <td>{venta.estadoVenta}</td>
-                    <td><Button color="primary" onClick={() => props.handleShowEditar(indice)} >Editar</Button>
-                        {" "}
-                        <Button color="danger" onClick={() => props.eliminarVenta(indice)} >Eliminar</Button>
-                    </td>
-                </tr>
-            )
-        }
-    )
-    return ventas
-}
-
-const data1 = [
-    { idProducto: 1045, descripcion: "Taladro percutor 3 pulgadas", valor_unitario: 12000, cantidad: '2' },
-    { idProducto: 1012, descripcion: "Almadana 3 lb Mango fibra de Vidrio", valor_unitario: 250000, cantidad: '5', },
-];
-
-const data2 = [
-    { idProducto: 1078, descripcion: "Martillo", valor_unitario: 45000, cantidad: '5' },
-    { idProducto: 1056, descripcion: "Pulidora", valor_unitario: 120000, cantidad: '8', },
-];
-
-const data3 = [
-    { idProducto: 1045, descripcion: "Pala", valor_unitario: 67000, cantidad: '2' },
-    { idProducto: 1034, descripcion: "Destornillador", valor_unitario: 123000, cantidad: '4', },
-];
-
-export default class Inicio extends Component {
-    constructor(props) {
-        super(props);
-        this.handleAgregarVenta = this.handleAgregarVenta.bind(this);
-        this.eliminarVenta = this.eliminarVenta.bind(this);
-        this.handleShow = this.handleShow.bind(this);
-        this.handleClose = this.handleClose.bind(this);
-        this.handleShowEditar = this.handleShowEditar.bind(this);
-        this.limpiarModal = this.limpiarModal.bind(this);
-        this.agregarNuevaVenta = this.agregarNuevaVenta.bind(this);
-        this.state = {
-            ventas: [
-                {
-                    identificador: '1',
-                    valor: '120000',
-                    productos: data1,
-                    fecha: '2021-11-02',
-                    identificacionCliente: '10974635142',
-                    nombreCliente: 'cliente1',
-                    nombreVendedor: 'Juan Sebastian Rodriguez',
-                    estadoVenta: 'Embalaje',
-
-                },
-                {
-                    identificador: '2',
-                    valor: '230000',
-                    productos: data2,
-                    fecha: '2021-03-02',
-                    identificacionCliente: '1234635142',
-                    nombreCliente: 'cliente2',
-                    nombreVendedor: 'Jhon Edinson Cruz',
-                    estadoVenta: 'Despacho',
-                },
-                {
-                    identificador: '3',
-                    valor: '430000',
-                    productos: data3,
-                    fecha: '2021-10-02',
-                    identificacionCliente: '1093145142',
-                    nombreCliente: 'sandra',
-                    nombreVendedor: 'Yuliana Gaviria',
-                    estadoVenta: 'Embalaje',
-
-                },
-                {
-                    identificador: '4',
-                    valor: '870000',
-                    productos: data2,
-                    fecha: '2020-06-02',
-                    identificacionCliente: '10912354142',
-                    nombreCliente: 'cliente4',
-                    nombreVendedor: 'Jennifer Monroy',
-                    estadoVenta: 'Despacho',
-
-                },
-                {
-                    identificador: '5',
-                    valor: '760000',
-                    productos: data3,
-                    fecha: '2020-04-02',
-                    identificacionCliente: '11235142',
-                    nombreCliente: 'cliente5',
-                    nombreVendedor: 'Jennifer Monroy',
-                    estadoVenta: 'Despacho',
-
-                },
-            ],
-            show: false,
-            ventaEditar: {
-                identificador: '',
-                valor: 0,
-                productos: [{
-                    idProducto: '',
-                    descripcion: '',
-                    valor_unitario: 0,
-                    cantidad: 0
-                }
-                ],
-                fecha: '',
-                identificacionCliente: '',
-                nombreCliente: '',
-                nombreVendedor: '',
-                estadoVenta: '',
-            }
-
-        }
+class Ventas extends Component {
+    state = {
+      data: [],
+      modalEditar: false,
+      modalInsertar: false,
+      form: {
+        id_venta: "",
+        id_producto: "",
+        descripcion: "",      
+        cantidad:"",
+        valor_unitario: "",
+        fecha_venta: "",
+        id_cliente: "",
+        nombre_cliente:"",
+        valor_total_venta: "",
+        usuario: "",
+        estado: "",
+      },
+      id:0
     };
-    //agregarVenta = () => { };
-
-    handleAgregarVenta() {
-        //const ventas = this.state.ventas;
-        this.setState({
-            ventas: [...this.state.ventas, this.state.ventaEditar]
+  
+      peticionGet = () => {
+        fireDb.child("Ventas").on("value", (venta) => {
+          if (venta.val() !== null) {
+            this.setState({ ...this.state.data, data: venta.val() });
+          } else {
+            this.setState({ data: [] });
+          }
         });
-    }
-
-    //Eliminar una venta
-
-    eliminarVenta(identificador) {
-        const ventas = this.state.ventas;
-        this.setState({
-            ventas: ventas.filter((venta, indiceMatriz) => {
-                return indiceMatriz !== identificador
-            })
-        });
-    }
-
-    agregarNuevaVenta(evento){
-        const nombre = evento.target.name;
-        const valor = evento.target.value;
-        console.log("NOMBRE: " + nombre + " VALOR: " + valor)
-        this.setState({
-            ventaEditar: {
-                [nombre]: valor,
-            }
-        });
-    }
-
-
-    limpiarModal() {
-        this.setState({
-            ventaEditar: {
-                identificador: '',
-                valor: 0,
-                productos: [{
-                    idProducto: '',
-                    descripcion: '',
-                    valor_unitario: 0,
-                    cantidad: 0
-                }
-                ],
-                fecha: '',
-                identificacionCliente: '',
-                nombreCliente: '',
-                nombreVendedor: '',
-                estadoVenta: '',
-            }
-        })
-    }
-
-
-    handleShowEditar = (indice) => {
-        const ventass = this.state.ventas
-
-        for (var i = 0; i < ventass.length; i++) {
-            if (i === indice) {
-                this.setState({
-                    ventaEditar: {
-                        identificador: ventass[i].identificador,
-                        valor: ventass[i].valor,
-                        productos: ventass[i].productos,
-                        fecha: ventass[i].fecha,
-                        identificacionCliente: ventass[i].identificacionCliente,
-                        nombreCliente: ventass[i].nombreCliente,
-                        nombreVendedor: ventass[i].nombreVendedor,
-                        estadoVenta: ventass[i].estadoVenta,
-                    },
-                    show: true
-
-                });
-                break;
-            }
+      };
+  
+      peticionPost=()=>{
+        fireDb.child("Ventas").push(this.state.form,
+          error=>{
+            if(error)console.log(error)
+          });
+          this.setState({modalInsertar: false});
+      }
+  
+      peticionPut=()=>{
+        fireDb.child(`Ventas/${this.state.id}`).set(
+          this.state.form,
+          error=>{
+            if(error)console.log(error)
+          });
+          this.setState({modalEditar: false});
+      }
+  
+      peticionDelete=()=>{
+        if(window.confirm(`Estás seguro que deseas eliminar la venta ${this.state.form && this.state.form.canal}?`))
+        {
+          fireDb.child(`Ventas/${this.state.id}`).remove(
+          error=>{
+            if(error)console.log(error)
+          });
         }
+      }
+    
+      handleChange=e=>{
+        this.setState({form:{
+          ...this.state.form,
+          [e.target.name]: e.target.value
+        }})
+        console.log(this.state.form);
+      }
+    
+      seleccionarproducto=async(producto, id, caso)=>{
+    
+        await this.setState({form: producto, id: id});
+    
+        (caso==="Editar")?this.setState({modalEditar: true}):
+        this.peticionDelete()
+    
+      }
+    
+      componentDidMount() {
+        this.peticionGet();
+      }
 
-    }
-
-    handleShow() {
-        this.limpiarModal();
-        this.setState({
-            show: true
-        });
-    }
-
-    handleClose() {
-        this.setState({
-            show: false
-        });
-    }
-
-
-    render() {
-        const ventas = this.state.ventas;
+      
+      render() {
+        
         return (
-            <div className="contenedor-app">
-                <Navigation />
-                <div className="contenedor mt-3">
-                    <main>
-                        <h1>Ventas</h1>
-                        <p>Esta es la lista de ventas</p>
-                    </main>
-                    <p />
-                    <div className="barraBusqueda">
+          <>
+          <Navigation />
+              <>
+              <Container className="mt-5 contenedor contenedor-Ventas">
+              <h1>Ventas</h1>
+              <div className="barraBusqueda">
                         <input
                         type="text"
                         placeholder="Buscar"
@@ -253,45 +132,398 @@ export default class Inicio extends Component {
                         {" "}
                         <FontAwesomeIcon icon={faSearch} />
                         </button>
-                    </div>
-                    <table className="table">
-                        <thead>
-                            <tr>
-                                <th scope="col">Id</th>
-                                <th scope="col">Valor Total</th>
-                                <th scope="col">Fecha</th>
-                                <th scope="col"># identificacion del Cliente</th>
-                                <th scope="col">Nombre Cliente</th>
-                                <th scope="col">Nombre del Vendedor</th>
-                                <th scope="col">Estado de Venta</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <Venta
-                                handleShow={this.handleShow}
-                                handleShowEditar={this.handleShowEditar}
-                                ventas={ventas}
-                                eliminarVenta={this.eliminarVenta}
-                                editarVenta={this.editarVenta} />
-                        </tbody>
-                    </table>
-                    <Button variant="primary" onClick={this.handleShow}>
-                        + Nueva venta
-                    </Button>
-                    <ModalWindow
-                    agregarNuevaVenta={this.agregarNuevaVenta}
-                        limpiarModal={this.limpiarModal}
-                        ventaEditar={this.state.ventaEditar}
-                        handleShowEditar={this.handleShowEditar}
-                        ventaModificar={this.ventaModificar}
-                        datosVentas={this.state.ventas}
-                        handleAgregarVenta={this.handleAgregarVenta}
-                        ventas={this.state.ventas}
-                        show={this.state.show}
-                        handleClose={this.handleClose}
-                    />
-                </div>
-            </div>
+              </div>
+              <br />
+                <button className="btn btn-success" onClick={()=>this.setState({modalInsertar: true})}>Insertar Nueva Venta</button>
+                  <br />
+                  <br />
+                  <Table>
+  
+                  <thead>
+                    <tr>
+                      <th>Id.Venta</th>
+                      <th>Id.Producto</th>
+                      <th>Descripcion</th>
+                      <th>Cantidad</th>
+                      <th>Valor Unitario</th>
+                      <th>Fecha Venta</th>
+                      <th>Id.Cliente</th>
+                      <th>Nombre Cliente</th>
+                      <th>Valor Total Venta</th>                      
+                      <th>Usuario</th>
+                      <th>Estado</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  
+                  <tbody>
+                    {Object.keys(this.state.data).map(i=>{
+            
+                      return <tr key={i}>
+                        <td>{this.state.data[i].id_venta}</td>
+                        <td>{this.state.data[i].id_producto}</td>
+                        <td>{this.state.data[i].descripcion}</td>
+                        <td>{this.state.data[i].cantidad}</td>
+                        <td>{this.state.data[i].valor_unitario}</td>
+                        <td>{this.state.data[i].fecha_venta}</td>
+                        <td>{this.state.data[i].id_cliente}</td>
+                        <td>{this.state.data[i].nombre_cliente}</td>
+                        <td>{this.state.data[i].valor_total_venta}</td>
+                        <td>{this.state.data[i].usuario}</td>
+                        <td>{this.state.data[i].estado}</td>
+                        <td>
+                          <button className="btn btn-primary" onClick={()=>this.seleccionarproducto(this.state.data[i], i, 'Editar')}>Editar</button> {"   "}
+                          <button className="btn btn-danger" onClick={()=>this.seleccionarproducto(this.state.data[i], i, 'Eliminar')}>Eliminar</button>
+                        </td>
+                      </tr>
+                    })}
+                  </tbody>
+  
+                  </Table>
+              </Container>
+  
+              <Modal className="modal-Ventas" isOpen={this.state.modalInsertar}>
+  
+                  <ModalHeader>
+  
+                  <div><h3>Insertar Nueva Venta</h3></div>
+  
+                  </ModalHeader>
+      
+                  <ModalBody>
+  
+                  <FormGroup>
+                      <label>
+                      Id.Venta: 
+                      </label>
+                      <input
+                      className="form-control"
+                      type="number"
+                      name="id_venta"
+                      onChange={this.handleChange}
+                      />
+                  </FormGroup>
+                  
+                  <FormGroup>
+                      <label>
+                      Id.Producto: 
+                      </label>
+                      <input
+                      className="form-control"
+                      name="id_Producto"
+                      type="number"
+                      onChange={this.handleChange}
+                      />
+                  </FormGroup>
+  
+                  <FormGroup>
+                      <label>
+                      Descripcion:
+                      </label>
+                      <input
+                      className="form-control"
+                      name="descripcion"
+                      type="text"
+                      onChange={this.handleChange}
+                      />
+                  </FormGroup>
+
+                  <FormGroup>
+                      <label>
+                      Cantidad:
+                      </label>
+                      <input
+                      className="form-control"
+                      name="cantidad"
+                      type="number"
+                      onChange={this.handleChange}
+                      />
+                  </FormGroup>
+
+                  <FormGroup>
+                      <label>
+                      Valor Unitario:
+                      </label>
+                      <input
+                      className="form-control"
+                      name="valor_unitario"
+                      type="number"
+                      onChange={this.handleChange}
+                      />
+                  </FormGroup>
+
+                  <FormGroup>
+                      <label>
+                      Fecha Venta:
+                      </label>
+                      <input
+                      className="form-control"
+                      name="fecha_venta"
+                      type={'date'}
+                      onChange={this.handleChange}
+                      />
+                  </FormGroup>
+
+                  <FormGroup>
+                      <label>
+                      Id.Cliente:
+                      </label>
+                      <input
+                      className="form-control"
+                      name="id_cliente"
+                      type="number"
+                      onChange={this.handleChange}
+                      />
+                  </FormGroup>
+
+                  <FormGroup>
+                      <label>
+                      Nombre Cliente</label>
+                      <input
+                      className="form-control"
+                      name="nombre_cliente"
+                      type="text"
+                      onChange={this.handleChange}
+                      />
+                  </FormGroup>
+
+                  <FormGroup>
+                      <label>
+                      Valor Total Venta:
+                      </label>
+                      <input
+                      className="form-control"
+                      name="valor_total_venta"
+                      type="number"
+                      onChange={this.handleChange}
+                      />
+                  </FormGroup>
+
+                  <FormGroup>
+                      <label>
+                      Usuario:
+                      </label>
+                      <input
+                      className="form-control"
+                      name="usuario"
+                      type="text"
+                      onChange={this.handleChange}
+                      />
+                  </FormGroup>
+
+                  <FormGroup>
+                      <label>
+                      Estado:
+                      </label>
+                      <select className="form-select" name="estado" onChange={this.handleChange}>
+                      {optionsEstado.map((option) => (
+                      <option value={option.value}>{option.label}</option>
+                      ))}
+                      </select>
+                  </FormGroup>
+                
+                  </ModalBody>
+      
+                  <ModalFooter>
+  
+                  <Button
+                      color="primary"
+                      onClick={()=>this.peticionPost()}
+                  >
+                      Insertar
+                  </Button>
+                  <Button
+                      className="btn btn-danger"
+                      onClick={()=>this.setState({modalInsertar: false})}
+                  >
+                      Cancelar
+                  </Button>
+  
+                  </ModalFooter>
+  
+              </Modal>
+  
+  
+      
+              <Modal className="modal-Ventas" isOpen={this.state.modalEditar} >
+  
+                  <ModalHeader>
+  
+                  <div><h3>Editar Venta</h3></div>
+  
+                  </ModalHeader>
+      
+                  <ModalBody>
+  
+                  <FormGroup>
+                      <label>
+                      Id.Venta:
+                      </label>
+                      <input
+                      className="form-control"
+                      name="id_venta"
+                      readOnly
+                      type="number"
+                      onChange={this.handleChange} 
+                      value={this.state.form && this.state.form.id_venta}
+                      />
+                  </FormGroup>
+                  
+                  <FormGroup>
+                      <label>
+                      Id.Producto: 
+                      </label>
+                      <input
+                      className="form-control"
+                      name="id_producto"
+                      type="number"
+                      onChange={this.handleChange} 
+                      value={this.state.form && this.state.form.id_producto}
+                      />
+                  </FormGroup>
+  
+                  <FormGroup>
+                      <label>
+                      Descripcion:
+                      </label>
+                      <input
+                      className="form-control"
+                      name="descripcion"
+                      type="text"
+                      onChange={this.handleChange} 
+                      value={this.state.form && this.state.form.descripcion}
+                      />
+                  </FormGroup>
+
+                  <FormGroup>
+                      <label>
+                      Cantidad:
+                      </label>
+                      <input
+                      className="form-control"
+                      name="cantidad"
+                      type="number"
+                      onChange={this.handleChange} 
+                      value={this.state.form && this.state.form.cantidad}
+                      />
+                  </FormGroup>
+
+                  <FormGroup>
+                      <label>
+                      Valor Unitario:
+                      </label>
+                      <input
+                      className="form-control"
+                      name="valor_unitario"
+                      type="number"
+                      onChange={this.handleChange} 
+                      value={this.state.form && this.state.form.valor_unitario}
+                      />
+                  </FormGroup>
+
+                  <FormGroup>
+                      <label>
+                      Fecha Venta:
+                      </label>
+                      <input
+                      className="form-control"
+                      name="fecha_venta"
+                      type={'date'}
+                      onChange={this.handleChange} 
+                      value={this.state.form && this.state.form.fecha_venta}
+                      />
+                  </FormGroup>
+
+                  <FormGroup>
+                      <label>
+                      Id.Cliente:
+                      </label>
+                      <input
+                      className="form-control"
+                      name="id_cliente"
+                      type="number"
+                      onChange={this.handleChange} 
+                      value={this.state.form && this.state.form.id_cliente}
+                      />
+                  </FormGroup>
+ 
+                  <FormGroup>
+                      <label>
+                      Nombre Cliente:
+                      </label>
+                      <input
+                      className="form-control"
+                      name="nombre_cliente"
+                      type="text"
+                      onChange={this.handleChange} 
+                      value={this.state.form && this.state.form.nombre_cliente}
+                      />
+                  </FormGroup>
+
+                  <FormGroup>
+                      <label>
+                      Valor Total Venta:
+                      </label>
+                      <input
+                      className="form-control"
+                      name="valor_total_venta"
+                      type="number"
+                      onChange={this.handleChange} 
+                      value={this.state.form && this.state.form.valor_total_venta}
+                      />
+                  </FormGroup>
+
+                  <FormGroup>
+                      <label>
+                      Usuario:
+                      </label>
+                      <input
+                      className="form-control"
+                      name="usuario"
+                      type="text"
+                      onChange={this.handleChange} 
+                      value={this.state.form && this.state.form.usuario}
+                      />
+                  </FormGroup>
+
+                  <FormGroup>
+                      <label>
+                      Estado:
+                      </label>
+                      <select className="form-select" name="estado" value={this.state.form && this.state.form.estado} onChange={this.handleChange}>
+                      <option value={this.state.form.estado}>{this.state.form.estado}</option>
+                      {optionsEstado.map((option) => (
+                      <option value={option.value}>{option.label}</option>
+                      ))}
+                      </select>
+                  </FormGroup>
+  
+                  </ModalBody>
+      
+                  <ModalFooter>
+  
+                  <Button
+                      color="primary"
+                      onClick={()=>this.peticionPut()}
+                  >
+                      Editar
+                  </Button>
+                  <Button
+                      color="danger"
+                      onClick={()=>this.setState({modalEditar: false})}
+                  >
+                      Cancelar
+                  </Button>
+  
+                  </ModalFooter>
+  
+              </Modal>
+  
+      
+              
+              </>
+          </>
         );
+      }
     }
-}
+    export default Ventas;
