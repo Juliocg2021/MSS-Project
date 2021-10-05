@@ -82,7 +82,7 @@ class Ventas extends Component {
       }
   
       peticionDelete=()=>{
-        if(window.confirm(`Estás seguro que deseas eliminar la venta ${this.state.form && this.state.form.canal}?`))
+        if(window.confirm(`Estás seguro que deseas eliminar la venta ${this.state.form && this.state.form.id_venta}?`))
         {
           fireDb.child(`Ventas/${this.state.id}`).remove(
           error=>{

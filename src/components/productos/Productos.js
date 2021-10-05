@@ -72,7 +72,7 @@ class Productos extends Component {
       }
   
       peticionDelete=()=>{
-        if(window.confirm(`Estás seguro que deseas eliminar el producto ${this.state.form && this.state.form.canal}?`))
+        if(window.confirm(`Estás seguro que deseas eliminar el producto ${this.state.form && this.state.form.id_producto}?`))
         {
           fireDb.child(`productos/${this.state.id}`).remove(
           error=>{

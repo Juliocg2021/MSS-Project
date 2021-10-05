@@ -91,7 +91,7 @@ const optionsEstado = [
     }
 
     peticionDelete=()=>{
-      if(window.confirm(`Estás seguro que deseas eliminar el usuario ${this.state.form && this.state.form.canal}?`))
+      if(window.confirm(`Estás seguro que deseas eliminar el usuario ${this.state.form && this.state.form.identificacion}?`))
       {
         fireDb.child(`usuarios/${this.state.id}`).remove(
         error=>{
