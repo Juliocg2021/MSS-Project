@@ -11,3 +11,12 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.Component-paginationToolbar-2{
+  font-size: 1.2rem  !important;
+}
+
+
+.MuiTypography-caption{
+  font-size: 1.2rem  !important;
+}

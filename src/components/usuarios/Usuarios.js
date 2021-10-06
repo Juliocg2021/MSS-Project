@@ -252,6 +252,7 @@ const optionsEstado = [
                 searchFieldStyle: {
                   fontSize: "14px"
                 }
+                
             
               }}
               localization={{

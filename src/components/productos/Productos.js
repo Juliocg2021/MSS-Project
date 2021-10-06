@@ -3,10 +3,8 @@ import React, { Component } from 'react'
 import Navigation from '../globals/Navigation'
 import './Productos.css'
 import "bootstrap/dist/css/bootstrap.min.css";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch } from "@fortawesome/free-solid-svg-icons";
+
 import {
-  Table,
   Button,
   Container,
   Modal,
@@ -17,6 +15,50 @@ import {
 } from "reactstrap";
 
 import fireDb from '../../firebase';
+
+import MaterialTable from "material-table";
+
+
+import { forwardRef } from 'react';
+
+import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
+
+import ArrowDownward from '@material-ui/icons/ArrowDownward';
+import Check from '@material-ui/icons/Check';
+import ChevronLeft from '@material-ui/icons/ChevronLeft';
+import ChevronRight from '@material-ui/icons/ChevronRight';
+import Clear from '@material-ui/icons/Clear';
+import DeleteOutline from '@material-ui/icons/DeleteOutline';
+import Edit from '@material-ui/icons/Edit';
+import FilterList from '@material-ui/icons/FilterList';
+import FirstPage from '@material-ui/icons/FirstPage';
+import LastPage from '@material-ui/icons/LastPage';
+import Remove from '@material-ui/icons/Remove';
+import SaveAlt from '@material-ui/icons/SaveAlt';
+import Search from '@material-ui/icons/Search';
+import ViewColumn from '@material-ui/icons/ViewColumn';
+
+
+const tableIcons = {
+  Check: forwardRef((props, ref) => <Check {...props} ref={ref} />),
+  Clear: forwardRef((props, ref) => <Clear {...props} ref={ref} />),
+  Delete: forwardRef((props, ref) => <DeleteOutline {...props} ref={ref} />),
+  DetailPanel: forwardRef((props, ref) => <ChevronRight {...props} ref={ref} />),
+  Edit: forwardRef((props, ref) => <Edit {...props} ref={ref} />),
+  Export: forwardRef((props, ref) => <SaveAlt {...props} ref={ref} />),
+  Filter: forwardRef((props, ref) => <FilterList {...props} ref={ref} />),
+  FirstPage: forwardRef((props, ref) => <FirstPage {...props} ref={ref} />),
+  LastPage: forwardRef((props, ref) => <LastPage {...props} ref={ref} />),
+  NextPage: forwardRef((props, ref) => <ChevronRight {...props} ref={ref} />),
+  PreviousPage: forwardRef((props, ref) => <ChevronLeft {...props} ref={ref} />),
+  ResetSearch: forwardRef((props, ref) => <Clear {...props} ref={ref} />),
+  Search: forwardRef((props, ref) => <Search {...props} ref={ref} />),
+  SortArrow: forwardRef((props, ref) => <ArrowDownward {...props} ref={ref} />),
+  ThirdStateCheck: forwardRef((props, ref) => <Remove {...props} ref={ref} />),
+  ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} />)
+};
+
 
 //Opciones para select de estado
 const optionsEstado = [
@@ -89,9 +131,9 @@ class Productos extends Component {
         console.log(this.state.form);
       }
     
-      seleccionarproducto=async(producto, id, caso)=>{
-    
-        await this.setState({form: producto, id: id});
+      seleccionarProducto=async(producto, caso)=>{
+  
+        await this.setState({form: producto, id: producto.id});
     
         (caso==="Editar")?this.setState({modalEditar: true}):
         this.peticionDelete()
@@ -111,51 +153,95 @@ class Productos extends Component {
               <>
               <Container className="mt-5 contenedor contenedor-productos">
               <h1>Productos</h1>
-              <div className="barraBusqueda">
-                        <input
-                        type="text"
-                        placeholder="Buscar"
-                        className="textField"
-                        name="busqueda"
-                        />
-                        <button type="button" className="btnBuscar" /*onClick=*/>
-                        {" "}
-                        <FontAwesomeIcon icon={faSearch} />
-                        </button>
-              </div>
+              
               <br />
                 <button className="btn btn-success" onClick={()=>this.setState({modalInsertar: true})}>Insertar producto</button>
                   <br />
                   <br />
-                  <Table>
+
+                  <MaterialTable 
+
+                    columns={[
+                    { 
+                      title: "Id producto", 
+                      field: "id_producto"
+                    },
+                    { 
+                      title: "Descripción", 
+                      field: "descripcion"
+                    },
+                    { 
+                      title: "Valor unitario", 
+                      field: "valor_unitario"
+                    },
+                    { 
+                      title: "Estado", 
+                      field: "estado"
+                    }
+                   
+                    
+                  ]}
+                  data={Object.keys(this.state.data).map(i=>{
+
+                    return {
+                      id: i,
+                      id_producto: this.state.data[i].id_producto,
+                      descripcion: this.state.data[i].descripcion,
+                      valor_unitario: this.state.data[i].valor_unitario,
+                      estado: this.state.data[i].estado
   
-                  <thead>
-                    <tr>
-                      <th>Id.Producto</th>
-                      <th>Descripcion</th>
-                      <th>Valor Unitario</th>
-                      <th>Estado</th>
-                      <th>Acciones</th>
-                    </tr>
-                  </thead>
+                      
+                    }
+    
                   
-                  <tbody>
-                    {Object.keys(this.state.data).map(i=>{
-            
-                      return <tr key={i}>
-                        <td>{this.state.data[i].id_producto}</td>
-                        <td>{this.state.data[i].descripcion}</td>
-                        <td>{this.state.data[i].valor_unitario}</td>
-                        <td>{this.state.data[i].estado}</td>
-                        <td>
-                          <button className="btn btn-primary" onClick={()=>this.seleccionarproducto(this.state.data[i], i, 'Editar')}>Editar</button> {"   "}
-                          <button className="btn btn-danger" onClick={()=>this.seleccionarproducto(this.state.data[i], i, 'Eliminar')}>Eliminar</button>
-                        </td>
-                      </tr>
-                    })}
-                  </tbody>
-  
-                  </Table>
+                  
+                  })}
+                  title="Lista de productos"  
+                  icons={tableIcons}
+                  actions={[
+                    {
+                      icon: EditIcon,
+                      tooltip: 'Editar producto',
+                      onClick: (event, rowData) => this.seleccionarProducto(rowData, "Editar")
+                    },
+                    {
+                      icon: DeleteIcon,
+                      tooltip: 'Eliminar producto',
+                      onClick: (event, rowData) => this.seleccionarProducto(rowData, "Eliminar")
+                    }
+                  ]}
+                  options={{
+                    actionsColumnIndex: -1,
+                    pageSize: 5,
+                    pageSizeOptions: [5, 10, 20, 30, 40, 50],
+                    search: true,
+                    paging: true,
+                    sorting: true,
+                    cellStyle : {
+                      padding: "4px",
+                      border: "1px solid #e1e1e1",
+                      fontSize: "14px"
+                    },
+                    headerStyle: {
+                      backgroundColor: '#01579b',
+                      fontSize: "12px",
+                      color: '#FFF',
+                      padding: "8px"
+                    },
+                    searchFieldStyle: {
+                      fontSize: "14px"
+                    }
+                    
+                
+                  }}
+                  localization={{
+                    header:{
+                      actions: "Acciones"
+                    }
+                  }}
+
+	            />
+                  
               </Container>
   
               <Modal className="modal-productos" isOpen={this.state.modalInsertar}>

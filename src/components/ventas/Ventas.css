@@ -8,7 +8,11 @@
 .modal-Ventas button,
 .modal-Ventas label,
 .modal-Ventas input,
-.modal-Ventas select {
+.modal-Ventas textarea,
+.modal-Ventas select
+ {
     font-size: 1.5rem;
 
 }
+
+
