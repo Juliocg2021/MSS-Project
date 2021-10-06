@@ -1,6 +1,8 @@
+
+
 .contenedor-usuarios,
 .contenedor-usuarios button {
-    font-size: 1.5rem;
+    font-size: 1.5rem !important;
 }
 
 

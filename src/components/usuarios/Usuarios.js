@@ -4,7 +4,6 @@ import Navigation from '../globals/Navigation'
 import './Usuarios.css'
 import "bootstrap/dist/css/bootstrap.min.css";
 import {
-  Table,
   Button,
   Container,
   Modal,
@@ -15,6 +14,50 @@ import {
 } from "reactstrap";
 
 import fireDb from '../../firebase';
+
+import MaterialTable from "material-table";
+
+
+import { forwardRef } from 'react';
+
+import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
+
+import ArrowDownward from '@material-ui/icons/ArrowDownward';
+import Check from '@material-ui/icons/Check';
+import ChevronLeft from '@material-ui/icons/ChevronLeft';
+import ChevronRight from '@material-ui/icons/ChevronRight';
+import Clear from '@material-ui/icons/Clear';
+import DeleteOutline from '@material-ui/icons/DeleteOutline';
+import Edit from '@material-ui/icons/Edit';
+import FilterList from '@material-ui/icons/FilterList';
+import FirstPage from '@material-ui/icons/FirstPage';
+import LastPage from '@material-ui/icons/LastPage';
+import Remove from '@material-ui/icons/Remove';
+import SaveAlt from '@material-ui/icons/SaveAlt';
+import Search from '@material-ui/icons/Search';
+import ViewColumn from '@material-ui/icons/ViewColumn';
+
+
+const tableIcons = {
+  Check: forwardRef((props, ref) => <Check {...props} ref={ref} />),
+  Clear: forwardRef((props, ref) => <Clear {...props} ref={ref} />),
+  Delete: forwardRef((props, ref) => <DeleteOutline {...props} ref={ref} />),
+  DetailPanel: forwardRef((props, ref) => <ChevronRight {...props} ref={ref} />),
+  Edit: forwardRef((props, ref) => <Edit {...props} ref={ref} />),
+  Export: forwardRef((props, ref) => <SaveAlt {...props} ref={ref} />),
+  Filter: forwardRef((props, ref) => <FilterList {...props} ref={ref} />),
+  FirstPage: forwardRef((props, ref) => <FirstPage {...props} ref={ref} />),
+  LastPage: forwardRef((props, ref) => <LastPage {...props} ref={ref} />),
+  NextPage: forwardRef((props, ref) => <ChevronRight {...props} ref={ref} />),
+  PreviousPage: forwardRef((props, ref) => <ChevronLeft {...props} ref={ref} />),
+  ResetSearch: forwardRef((props, ref) => <Clear {...props} ref={ref} />),
+  Search: forwardRef((props, ref) => <Search {...props} ref={ref} />),
+  SortArrow: forwardRef((props, ref) => <ArrowDownward {...props} ref={ref} />),
+  ThirdStateCheck: forwardRef((props, ref) => <Remove {...props} ref={ref} />),
+  ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} />)
+};
+
 
 //Opciones para select de rol
 const optionsRol = [
@@ -108,9 +151,9 @@ const optionsEstado = [
       console.log(this.state.form);
     }
   
-    seleccionarUsuario=async(usuario, id, caso)=>{
+    seleccionarUsuario=async(usuario, caso)=>{
   
-      await this.setState({form: usuario, id: id});
+      await this.setState({form: usuario, id: usuario.id});
   
       (caso==="Editar")?this.setState({modalEditar: true}):
       this.peticionDelete()
@@ -121,7 +164,6 @@ const optionsEstado = [
       this.peticionGet();
     }
 
-    
     render() {
       
       return (
@@ -134,37 +176,92 @@ const optionsEstado = [
               <button className="btn btn-success" onClick={()=>this.setState({modalInsertar: true})}>Insertar usuario</button>
                 <br />
                 <br />
-                <Table>
 
-                <thead>
-                  <tr>
-                    <th>Identificación</th>
-                    <th>Nombre</th>
-                    <th>Email</th>
-                    <th>Rol</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
-                
-                <tbody>
-                  {Object.keys(this.state.data).map(i=>{
-          
-                    return <tr key={i}>
-                      <td>{this.state.data[i].identificacion}</td>
-                      <td>{this.state.data[i].nombre}</td>
-                      <td>{this.state.data[i].email}</td>
-                      <td>{this.state.data[i].rol}</td>
-                      <td>{this.state.data[i].estado}</td>
-                      <td>
-                        <button className="btn btn-primary" onClick={()=>this.seleccionarUsuario(this.state.data[i], i, 'Editar')}>Editar</button> {"   "}
-                        <button className="btn btn-danger" onClick={()=>this.seleccionarUsuario(this.state.data[i], i, 'Eliminar')}>Eliminar</button>
-                      </td>
-                    </tr>
-                  })}
-                </tbody>
+                <MaterialTable 
 
-                </Table>
+	              columns={[
+	              { 
+	                title: "Identificacion", 
+	                field: "identificacion"
+	              },
+	              { 
+	                title: "Nombre",
+	                field: "nombre" 
+	              }, 
+                {
+                  title: "Email",
+                  field: "email"
+                },  
+                {
+                  title: "Rol",
+                  field: "rol"
+                },
+                {
+                  title: "Estado",
+                  field: "estado"
+                }
+	              
+	            ]}
+	            data={Object.keys(this.state.data).map(i=>{
+
+                return {
+                  id: i,
+                  identificacion: this.state.data[i].identificacion,
+                  nombre: this.state.data[i].nombre,
+                  email: this.state.data[i].email,
+                  password: this.state.data[i].password,
+                  rol: this.state.data[i].rol,
+                  estado: this.state.data[i].estado
+                }
+ 
+              
+               
+              })}
+              title="Lista de usuarios"  
+              icons={tableIcons}
+              actions={[
+                {
+                  icon: EditIcon,
+                  tooltip: 'Editar usuario',
+                  onClick: (event, rowData) => this.seleccionarUsuario(rowData, "Editar")
+                },
+                {
+                  icon: DeleteIcon,
+                  tooltip: 'Eliminar usuario',
+                  onClick: (event, rowData) => this.seleccionarUsuario(rowData, "Eliminar")
+                }
+              ]}
+              options={{
+                actionsColumnIndex: -1,
+                pageSize: 5,
+                pageSizeOptions: [5, 10, 20, 30, 40, 50],
+                search: true,
+                paging: true,
+                sorting: true,
+                cellStyle : {
+                  padding: "4px",
+                  border: "1px solid #e1e1e1",
+                  fontSize: "14px"
+                },
+                headerStyle: {
+                  backgroundColor: '#01579b',
+                  fontSize: "12px",
+                  color: '#FFF',
+                  padding: "8px"
+                },
+                searchFieldStyle: {
+                  fontSize: "14px"
+                }
+            
+              }}
+              localization={{
+                header:{
+                  actions: "Acciones"
+                }
+              }}
+
+	            />
+
             </Container>
 
             <Modal className="modal-usuarios" isOpen={this.state.modalInsertar}>
