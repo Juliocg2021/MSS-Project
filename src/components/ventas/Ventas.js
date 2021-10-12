@@ -107,7 +107,18 @@ class Ventas extends Component {
           error=>{
             if(error)console.log(error)
           });
-          this.setState({modalInsertar: false});
+          this.setState({
+            form: {
+              idventa: "",
+              fecha: "",
+              encargado: "",
+              idcliente: "",
+              nombrecliente: "",
+              listaproductos: "",
+              totalventa: "",
+              estado: "" 
+            },
+            modalInsertar: false});
       }
   
       peticionPut=()=>{
@@ -122,7 +133,7 @@ class Ventas extends Component {
       peticionDelete=()=>{
         if(window.confirm(`Estás seguro que deseas eliminar la venta ${this.state.form && this.state.form.idventa}?`))
         {
-          fireDb.child(`Ventas/${this.state.id}`).remove(
+          fireDb.child(`ventas/${this.state.id}`).remove(
           error=>{
             if(error)console.log(error)
           });
