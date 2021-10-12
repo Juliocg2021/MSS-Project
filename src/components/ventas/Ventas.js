@@ -1,7 +1,8 @@
-import React, { Component } from 'react'
-import Navigation from '../globals/Navigation'
-import './Ventas.css'
+import React, { Component } from 'react';
+import Navigation from '../globals/Navigation';
+import './Ventas.css';
 import "bootstrap/dist/css/bootstrap.min.css";
+import Productos from '../productos/Productos';
 
 import {
   Button,
@@ -37,6 +38,9 @@ import Remove from '@material-ui/icons/Remove';
 import SaveAlt from '@material-ui/icons/SaveAlt';
 import Search from '@material-ui/icons/Search';
 import ViewColumn from '@material-ui/icons/ViewColumn';
+import Add from '@material-ui/icons/Add';
+import Delete from '@material-ui/icons/Delete';
+import { ThreeDRotationSharp } from '@material-ui/icons';
 
 
 const tableIcons = {
@@ -60,185 +64,466 @@ const tableIcons = {
 
 //Opciones para select de estado
 const optionsEstado = [
-    {
-        label: "En Proceso",
-        value: "En Proceso",
-    },
-    {
-        label: "Cancelada",
-        value: "Cancelada",
-    },
-    {
+  {
+    label: "En Proceso",
+    value: "En Proceso",
+  },
+  {
+    label: "Cancelada",
+    value: "Cancelada",
+  },
+  {
     label: "Entregada",
     value: "Entregada",
-    }
-  ]
+  }
+]
+
+var count = 1;
 
 class Ventas extends Component {
-    state = {
-      data: [],
-      modalEditar: false,
-      modalInsertar: false,
+  state = {
+    data: [],
+    todosLosProductos: [],
+    modalEditar: false,
+    modalInsertar: false,
+    form: {
+      idventa: "",
+      fecha: "",
+      encargado: "",
+      idcliente: "",
+      nombrecliente: "",
+      listaproductos: [],
+      totalventa: "",
+      estado: ""
+    },
+    id: 0
+  };
+
+
+
+
+  peticionGetProductos = () => {
+    fireDb.child("productos").on("value", (producto) => {
+      if (producto.val() !== null) {
+        this.setState({ ...this.state.todosLosProductos, todosLosProductos: producto.val() });
+      } else {
+        this.setState({ todosLosProductos: [] });
+      }
+    });
+  };
+
+
+
+
+
+
+
+
+
+
+
+
+  peticionGet = () => {
+    fireDb.child("ventas").on("value", (venta) => {
+      if (venta.val() !== null) {
+        this.setState({ ...this.state.data, data: venta.val() });
+      } else {
+        this.setState({ data: [] });
+      }
+    });
+  };
+
+  peticionPost = () => {
+    fireDb.child("ventas").push(this.state.form,
+      error => {
+        if (error) console.log(error)
+      });
+    this.setState({
       form: {
         idventa: "",
         fecha: "",
         encargado: "",
         idcliente: "",
         nombrecliente: "",
-        listaproductos: "",
+        listaproductos: [],
         totalventa: "",
-        estado: "" 
+        estado: ""
       },
-      id:0
-    };
-  
-      peticionGet = () => {
-        fireDb.child("ventas").on("value", (venta) => {
-          if (venta.val() !== null) {
-            this.setState({ ...this.state.data, data: venta.val() });
-          } else {
-            this.setState({ data: [] });
-          }
+      modalInsertar: false
+    });
+  }
+
+  peticionPut = () => {
+    fireDb.child(`ventas/${this.state.id}`).set(
+      this.state.form,
+      error => {
+        if (error) console.log(error)
+      });
+    this.setState({ modalEditar: false });
+  }
+
+  peticionDelete = () => {
+    if (window.confirm(`Estás seguro que deseas eliminar la venta ${this.state.form && this.state.form.idventa}?`)) {
+      fireDb.child(`ventas/${this.state.id}`).remove(
+        error => {
+          if (error) console.log(error)
         });
-      };
-  
-      peticionPost=()=>{
-        fireDb.child("ventas").push(this.state.form,
-          error=>{
-            if(error)console.log(error)
-          });
-          this.setState({
-            form: {
-              idventa: "",
-              fecha: "",
-              encargado: "",
-              idcliente: "",
-              nombrecliente: "",
-              listaproductos: "",
-              totalventa: "",
-              estado: "" 
-            },
-            modalInsertar: false});
+    }
+    this.setState({
+      form: {
+        idventa: "",
+        fecha: "",
+        encargado: "",
+        idcliente: "",
+        nombrecliente: "",
+        listaproductos: [],
+        totalventa: "",
+        estado: ""
+      },
+      modalInsertar: false
+    });
+  }
+
+  handleChange = e => {
+    this.setState({
+      form: {
+        ...this.state.form,
+        [e.target.name]: e.target.value
       }
-  
-      peticionPut=()=>{
-        fireDb.child(`ventas/${this.state.id}`).set(
-          this.state.form,
-          error=>{
-            if(error)console.log(error)
-          });
-          this.setState({modalEditar: false});
+    })
+    console.log(this.state.form);
+  }
+
+  seleccionarVenta = async (venta, caso) => {
+
+    await this.setState({ form: venta, id: venta.id });
+
+    (caso === "Editar") ? this.setState({ modalEditar: true }) :
+      this.peticionDelete()
+
+  }
+
+  bolean = (idProducto) => {
+    var resultado = true;
+    for (var i = 0; i < this.state.form.listaproductos.length; i++) {
+      var id_producto = this.state.form.listaproductos[i].id_producto
+      if (id_producto === idProducto) {
+        resultado = false;
       }
-  
-      peticionDelete=()=>{
-        if(window.confirm(`Estás seguro que deseas eliminar la venta ${this.state.form && this.state.form.idventa}?`))
-        {
-          fireDb.child(`ventas/${this.state.id}`).remove(
-          error=>{
-            if(error)console.log(error)
-          });
+    }
+    return resultado
+  }
+
+  añadirProducto = (id, idProducto, descripcion, precio, estado) => {
+    //Se añade solo si el producto esta disponible
+    if (estado === "Disponible") {
+      //si el array esta vacio se añade el primer producto
+      if (this.state.form.listaproductos.length === 0) {
+        this.setState({
+          form: {
+            idventa: this.state.form.idventa,
+            fecha: this.state.form.fecha,
+            encargado: this.state.form.encargado,
+            idcliente: this.state.form.idcliente,
+            nombrecliente: this.state.form.nombrecliente,
+            listaproductos: [...this.state.form.listaproductos,
+            {
+              id_producto: idProducto,
+              descripcion: descripcion,
+              valor_unitario: precio,
+              cantidad: 1
+            }
+            ],
+            totalventa: this.state.form.totalventa,
+            estado: this.state.form.estado
+          }
+        })
+      }
+      //cuando el array tiene al menos un producto y voy a agregar otro nuevo
+      else if (this.bolean(idProducto)) {
+        this.setState({
+          form: {
+            idventa: this.state.form.idventa,
+            fecha: this.state.form.fecha,
+            encargado: this.state.form.encargado,
+            idcliente: this.state.form.idcliente,
+            nombrecliente: this.state.form.nombrecliente,
+            listaproductos: [...this.state.form.listaproductos,
+            {
+              id_producto: idProducto,
+              descripcion: descripcion,
+              valor_unitario: precio,
+              cantidad: 1
+            }
+            ],
+            totalventa: this.state.form.totalventa,
+            estado: this.state.form.estado
+          }
+        })
+      }
+      //cuando el array tiene al menos un producto y voy a agregar un mismo producto que ya tengo, se modifica la cantidad
+      else {
+        //Aqui buscare el id de la matrix que tiene el producto
+        var index = 0;
+        for (var i = 0; i < this.state.form.listaproductos.length; i++) {
+          if (this.state.form.listaproductos[i].id_producto === idProducto) {
+            index = i
+          }
         }
+        //aqui modifico la cantidad del producto en mi array: lista de productos
+        this.state.form.listaproductos[index] = {
+          id_producto: idProducto,
+          descripcion: descripcion,
+          valor_unitario: precio,
+          cantidad: this.state.form.listaproductos[index].cantidad + 1
+        }
+        //aqui renderizo la app
+        this.setState({});
       }
-    
-      handleChange=e=>{
-        this.setState({form:{
-          ...this.state.form,
-          [e.target.name]: e.target.value
-        }})
-        console.log(this.state.form);
-      }
-    
-      seleccionarVenta=async(venta, caso)=>{
-  
-        await this.setState({form: venta, id: venta.id});
-    
-        (caso==="Editar")?this.setState({modalEditar: true}):
-        this.peticionDelete()
-    
-      }
-    
-      componentDidMount() {
-        this.peticionGet();
-      }
+    }
+  }
 
-      
-      render() {
-        
-        return (
-          <>
-          <Navigation />
-              <>
-              <Container className="mt-5 contenedor contenedor-Ventas">
-              <h1>Ventas</h1>
-              <br />
-                <button className="btn btn-success" onClick={()=>this.setState({modalInsertar: true})}>Insertar Nueva Venta</button>
-                  <br />
-                  <br />
+  eliminarProducto = (idProducto) => {
+    const listaProductos = this.state.form.listaproductos;
+    this.setState({
+      form: {
+        listaproductos: listaProductos.filter(
+          (producto) => {
+            return producto.id_producto !== idProducto
+          }
+        )
+      }
+    })
+  }
 
-                  <MaterialTable 
+  componentDidMount() {
+    this.peticionGet();
+    this.peticionGetProductos();
+  }
 
-                    columns={[
-                    { 
-                      title: "Id venta", 
-                      field: "idventa"
-                    }
-                    ,
+
+  render() {
+    return (
+      <>
+        <Navigation />
+        <>
+          <Container className="mt-5 contenedor contenedor-Ventas">
+            <h1>Ventas</h1>
+            <br />
+            <button className="btn btn-success" onClick={() => this.setState({ modalInsertar: true })}>Insertar Nueva Venta</button>
+            <br />
+            <br />
+
+            <MaterialTable
+
+              columns={[
+                {
+                  title: "Id venta",
+                  field: "idventa"
+                }
+                ,
+                {
+                  title: "Fecha",
+                  field: "fecha"
+                },
+                {
+                  title: "Encargado",
+                  field: "encargado"
+                },
+                {
+                  title: "Id cliente",
+                  field: "idcliente"
+                },
+
+                {
+                  title: "Nombre cliente",
+                  field: "nombrecliente"
+                },
+                {
+                  title: "Total",
+                  field: "totalventa"
+                },
+                {
+                  title: "Estado",
+                  field: "estado"
+                }
+
+
+              ]}
+              data={Object.keys(this.state.data).map(i => {
+
+                return {
+                  id: i,
+                  idventa: this.state.data[i].idventa,
+                  fecha: this.state.data[i].fecha,
+                  encargado: this.state.data[i].encargado,
+                  idcliente: this.state.data[i].idcliente,
+                  nombrecliente: this.state.data[i].nombrecliente,
+                  listaproductos: this.state.data[i].listaproductos,
+                  totalventa: this.state.data[i].totalventa,
+                  estado: this.state.data[i].estado
+                }
+
+
+              })}
+              title="Lista de ventas"
+              icons={tableIcons}
+              actions={[
+                {
+                  icon: EditIcon,
+                  tooltip: 'Editar venta',
+                  onClick: (event, rowData) => this.seleccionarVenta(rowData, "Editar")
+                },
+                {
+                  icon: DeleteIcon,
+                  tooltip: 'Eliminar venta',
+                  onClick: (event, rowData) => this.seleccionarVenta(rowData, "Eliminar")
+                }
+              ]}
+              options={{
+                actionsColumnIndex: -1,
+                pageSize: 5,
+                pageSizeOptions: [5, 10, 20, 30, 40, 50],
+                search: true,
+                paging: true,
+                sorting: true,
+                cellStyle: {
+                  padding: "4px",
+                  border: "1px solid #e1e1e1",
+                  fontSize: "14px"
+                },
+                headerStyle: {
+                  backgroundColor: '#01579b',
+                  fontSize: "12px",
+                  color: '#FFF',
+                  padding: "8px"
+                },
+                searchFieldStyle: {
+                  fontSize: "14px"
+                }
+
+              }}
+              localization={{
+                header: {
+                  actions: "Acciones"
+                }
+              }}
+
+            />
+
+
+          </Container>
+
+          <Modal className="modal-Ventas" isOpen={this.state.modalInsertar}>
+
+            <ModalHeader>
+
+              <div><h3>Insertar Nueva Venta</h3></div>
+
+            </ModalHeader>
+
+            <ModalBody>
+
+              <FormGroup>
+                <label>
+                  Id.Venta:
+                </label>
+                <input
+                  className="form-control"
+                  type="number"
+                  name="idventa"
+                  onChange={this.handleChange}
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <label>
+                  Fecha.Venta:
+                </label>
+                <input
+                  className="form-control"
+                  name="fecha"
+                  type={'date'}
+                  onChange={this.handleChange}
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <label>
+                  Encargado:
+                </label>
+                <input
+                  className="form-control"
+                  name="encargado"
+                  type="text"
+                  onChange={this.handleChange}
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <label>
+                  Id.Cliente:
+                </label>
+                <input
+                  className="form-control"
+                  name="idcliente"
+                  type="number"
+                  onChange={this.handleChange}
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <label>
+                  Nombre.Cliente</label>
+                <input
+                  className="form-control"
+                  name="nombrecliente"
+                  type="text"
+                  onChange={this.handleChange}
+                />
+
+                {//Esto es toda la lista de productos 
+                }
+              </FormGroup>
+              <FormGroup>
+                <MaterialTable
+
+                  columns={[
                     {
-                      title: "Fecha",
-                      field: "fecha"
+                      title: "Id producto",
+                      field: "id_producto"
                     },
                     {
-                      title: "Encargado",
-                      field: "encargado"
+                      title: "Descripción",
+                      field: "descripcion"
                     },
                     {
-                      title: "Id cliente",
-                      field: "idcliente"
-                    },
-
-                    {
-                      title: "Nombre cliente",
-                      field: "nombrecliente"
-                    },
-                    {
-                      title: "Total",
-                      field: "totalventa"
+                      title: "Valor unitario",
+                      field: "valor_unitario"
                     },
                     {
                       title: "Estado",
                       field: "estado"
                     }
-                
-                    
-                  ]}
-                  data={Object.keys(this.state.data).map(i=>{
 
+
+                  ]}
+                  data={Object.keys(this.state.todosLosProductos).map(i => {
                     return {
                       id: i,
-                      idventa: this.state.data[i].idventa,
-                      fecha: this.state.data[i].fecha,
-                      encargado: this.state.data[i].encargado,
-                      idcliente: this.state.data[i].idcliente,
-                      nombrecliente: this.state.data[i].nombrecliente,
-                      listaproductos: this.state.data[i].listaproductos,
-                      totalventa: this.state.data[i].totalventa,
-                      estado: this.state.data[i].estado
+                      id_producto: this.state.todosLosProductos[i].id_producto,
+                      descripcion: this.state.todosLosProductos[i].descripcion,
+                      valor_unitario: this.state.todosLosProductos[i].valor_unitario,
+                      estado: this.state.todosLosProductos[i].estado
                     }
-    
-          
                   })}
-                  title="Lista de ventas"  
+                  title="Lista de productos"
                   icons={tableIcons}
                   actions={[
                     {
-                      icon: EditIcon,
-                      tooltip: 'Editar venta',
-                      onClick: (event, rowData) => this.seleccionarVenta(rowData, "Editar")
-                    },
-                    {
-                      icon: DeleteIcon,
-                      tooltip: 'Eliminar venta',
-                      onClick: (event, rowData) => this.seleccionarVenta(rowData, "Eliminar")
+                      icon: Add,
+                      tooltip: 'Añadir producto',
+                      onClick: (event, rowData) => this.añadirProducto(rowData.id, rowData.id_producto, rowData.descripcion, rowData.valor_unitario, rowData.estado)
                     }
                   ]}
                   options={{
@@ -248,7 +533,7 @@ class Ventas extends Component {
                     search: true,
                     paging: true,
                     sorting: true,
-                    cellStyle : {
+                    cellStyle: {
                       padding: "4px",
                       border: "1px solid #e1e1e1",
                       fontSize: "14px"
@@ -262,288 +547,427 @@ class Ventas extends Component {
                     searchFieldStyle: {
                       fontSize: "14px"
                     }
-                
+
+
                   }}
                   localization={{
-                    header:{
+                    header: {
                       actions: "Acciones"
                     }
                   }}
 
-                  />
+                />
+              </FormGroup>
 
-                  
-              </Container>
-  
-              <Modal className="modal-Ventas" isOpen={this.state.modalInsertar}>
-  
-                  <ModalHeader>
-  
-                  <div><h3>Insertar Nueva Venta</h3></div>
-  
-                  </ModalHeader>
-      
-                  <ModalBody>
-  
-                  <FormGroup>
-                      <label>
-                      Id.Venta: 
-                      </label>
-                      <input
-                      className="form-control"
-                      type="number"
-                      name="idventa"
-                      onChange={this.handleChange}
-                      />
-                  </FormGroup>
+              {//Este es el carrito
+              }
+              <FormGroup>
+                <MaterialTable
 
-                  <FormGroup>
-                      <label>
-                      Fecha.Venta:
-                      </label>
-                      <input
-                      className="form-control"
-                      name="fecha"
-                      type={'date'}
-                      onChange={this.handleChange}
-                      />
-                  </FormGroup>
-
-                  <FormGroup>
-                      <label>
-                      Encargado:
-                      </label>
-                      <input
-                      className="form-control"
-                      name="encargado"
-                      type="text"
-                      onChange={this.handleChange}
-                      />
-                  </FormGroup>
-
-                  <FormGroup>
-                      <label>
-                      Id.Cliente:
-                      </label>
-                      <input
-                      className="form-control"
-                      name="idcliente"
-                      type="number"
-                      onChange={this.handleChange}
-                      />
-                  </FormGroup>
-
-                  <FormGroup>
-                      <label>
-                      Nombre.Cliente</label>
-                      <input
-                      className="form-control"
-                      name="nombrecliente"
-                      type="text"
-                      onChange={this.handleChange}
-                      />
-                  </FormGroup>
-
-                  <FormGroup>
-                      <label>
-                      Lista.Productos</label>
-                      <textarea
-                      className="form-control"
-                      name="listaproductos"
-                      type="textarea"
-                      rows="5"
-                      onChange={this.handleChange}
-                      />
-                  </FormGroup>
-
-                  <FormGroup>
-                      <label>
-                      Total Venta:
-                      </label>
-                      <input
-                      className="form-control"
-                      name="totalventa"
-                      type="number"
-                      onChange={this.handleChange}
-                      />
-                  </FormGroup>
-
-                  <FormGroup>
-                      <label>
-                      Estado:
-                      </label>
-                      <select className="form-select" name="estado" onChange={this.handleChange}>
-                      {optionsEstado.map((option) => (
-                      <option value={option.value}>{option.label}</option>
-                      ))}
-                      </select>
-                  </FormGroup>
-                
-                  </ModalBody>
-      
-                  <ModalFooter>
-  
-                  <Button
-                      color="primary"
-                      onClick={()=>this.peticionPost()}
-                  >
-                      Insertar
-                  </Button>
-                  <Button
-                      className="btn btn-danger"
-                      onClick={()=>this.setState({modalInsertar: false})}
-                  >
-                      Cancelar
-                  </Button>
-  
-                  </ModalFooter>
-  
-              </Modal>
-  
-  
-              <Modal className="modal-Ventas" isOpen={this.state.modalEditar} >
-  
-                  <ModalHeader>
-  
-                  <div><h3>Editar Venta</h3></div>
-  
-                  </ModalHeader>
-      
-                  <ModalBody>
-  
-                  <FormGroup>
-                      <label>
-                      Id.Venta:
-                      </label>
-                      <input
-                      className="form-control"
-                      name="idventa"
-                      readOnly
-                      type="number"
-                      onChange={this.handleChange} 
-                      value={this.state.form && this.state.form.idventa}
-                      />
-                  </FormGroup>
-        
-
-                  <FormGroup>
-                      <label>
-                      Fecha.Venta:
-                      </label>
-                      <input
-                      className="form-control"
-                      name="fecha"
-                      type={'date'}
-                      onChange={this.handleChange} 
-                      value={this.state.form && this.state.form.fecha}
-                      />
-                  </FormGroup>
-
-                  <FormGroup>
-                      <label>
-                      Encargado:
-                      </label>
-                      <input
-                      className="form-control"
-                      name="encargado"
-                      type="text"
-                      onChange={this.handleChange} 
-                      value={this.state.form && this.state.form.encargado}
-                      />
-                  </FormGroup>
-
-                  <FormGroup>
-                      <label>
-                      Id.Cliente:
-                      </label>
-                      <input
-                      className="form-control"
-                      name="idcliente"
-                      type="number"
-                      onChange={this.handleChange} 
-                      value={this.state.form && this.state.form.idcliente}
-                      />
-                  </FormGroup>
- 
-                  <FormGroup>
-                      <label>
-                      Nombre.Cliente:
-                      </label>
-                      <input
-                      className="form-control"
-                      name="nombrecliente"
-                      type="text"
-                      onChange={this.handleChange} 
-                      value={this.state.form && this.state.form.nombrecliente}
-                      />
-                  </FormGroup>
-
-                  <FormGroup>
-                      <label>
-                      Lista.Productos:
-                      </label>
-                      <textarea
-                      className="form-control"
-                      name="listaproductos"
-                      rows="5"
-                      onChange={this.handleChange} 
-                      value={this.state.form && this.state.form.listaproductos}
-                      />
-                  </FormGroup>
-            
-
-                  <FormGroup>
-                      <label>
-                      Total Venta:
-                      </label>
-                      <input
-                      className="form-control"
-                      name="totalventa"
-                      type="number"
-                      onChange={this.handleChange} 
-                      value={this.state.form && this.state.form.totalventa}
-                      />
-                  </FormGroup>
+                  columns={[
+                    {
+                      title: "Id producto",
+                      field: "id_producto"
+                    },
+                    {
+                      title: "Descripción",
+                      field: "descripcion"
+                    },
+                    {
+                      title: "Valor unitario",
+                      field: "valor_unitario"
+                    },
+                    {
+                      title: "Cantidad",
+                      field: "cantidad"
+                    }
 
 
-                  <FormGroup>
-                      <label>
-                      Estado:
-                      </label>
-                      <select className="form-select" name="estado" value={this.state.form && this.state.form.estado} onChange={this.handleChange}>
-                      <option value={this.state.form.estado}>{this.state.form.estado}</option>
-                      {optionsEstado.map((option) => (
-                      <option value={option.value}>{option.label}</option>
-                      ))}
-                      </select>
-                  </FormGroup>
-  
-                  </ModalBody>
-      
-                  <ModalFooter>
-  
-                  <Button
-                      color="primary"
-                      onClick={()=>this.peticionPut()}
-                  >
-                      Editar
-                  </Button>
-                  <Button
-                      color="danger"
-                      onClick={()=>this.setState({modalEditar: false})}
-                  >
-                      Cancelar
-                  </Button>
-  
-                  </ModalFooter>
-  
-              </Modal>
-  
-      
-              
-              </>
-          </>
-        );
-      }
-    }
-    export default Ventas;
+                  ]}
+                  data={Object.keys(this.state.form.listaproductos).map(i => {
+                    return {
+                      id: i,
+                      id_producto: this.state.form.listaproductos[i].id_producto,
+                      descripcion: this.state.form.listaproductos[i].descripcion,
+                      valor_unitario: this.state.form.listaproductos[i].valor_unitario,
+                      cantidad: this.state.form.listaproductos[i].cantidad
+                    }
+                  })}
+                  title="Lista de productos"
+                  icons={tableIcons}
+                  actions={[
+                    {
+                      icon: Delete,
+                      tooltip: 'Eliminar Producto',
+                      onClick: (event, rowData) => this.eliminarProducto(rowData.id_producto)
+                    }
+                  ]}
+                  options={{
+                    actionsColumnIndex: -1,
+                    pageSize: 5,
+                    pageSizeOptions: [5, 10, 20, 30, 40, 50],
+                    search: true,
+                    paging: true,
+                    sorting: true,
+                    cellStyle: {
+                      padding: "4px",
+                      border: "1px solid #e1e1e1",
+                      fontSize: "14px"
+                    },
+                    headerStyle: {
+                      backgroundColor: '#01579b',
+                      fontSize: "12px",
+                      color: '#FFF',
+                      padding: "8px"
+                    },
+                    searchFieldStyle: {
+                      fontSize: "14px"
+                    }
+
+
+                  }}
+                  localization={{
+                    header: {
+                      actions: "Acciones"
+                    }
+                  }}
+
+                />
+              </FormGroup>
+
+
+
+              <FormGroup>
+                <label>
+                  Total Venta:
+                </label>
+                <input
+                  className="form-control"
+                  name="totalventa"
+                  type="number"
+                  onChange={this.handleChange}
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <label>
+                  Estado:
+                </label>
+                <select className="form-select" name="estado" onChange={this.handleChange}>
+                  {optionsEstado.map((option) => (
+                    <option value={option.value}>{option.label}</option>
+                  ))}
+                </select>
+              </FormGroup>
+
+            </ModalBody>
+
+            <ModalFooter>
+
+              <Button
+                color="primary"
+                onClick={() => this.peticionPost()}
+              >
+                Insertar
+              </Button>
+              <Button
+                className="btn btn-danger"
+                onClick={() => this.setState({ modalInsertar: false })}
+              >
+                Cancelar
+              </Button>
+
+            </ModalFooter>
+
+          </Modal>
+          {
+            //****************************************************/
+            ////////////////////MODAL EDITAR///////////////////////
+            //****************************************************/
+          }
+          <Modal className="modal-Ventas" isOpen={this.state.modalEditar} >
+
+            <ModalHeader>
+
+              <div><h3>Editar Venta</h3></div>
+
+            </ModalHeader>
+
+            <ModalBody>
+
+              <FormGroup>
+                <label>
+                  Id.Venta:
+                </label>
+                <input
+                  className="form-control"
+                  name="idventa"
+                  readOnly
+                  type="number"
+                  onChange={this.handleChange}
+                  value={this.state.form && this.state.form.idventa}
+                />
+              </FormGroup>
+
+
+              <FormGroup>
+                <label>
+                  Fecha.Venta:
+                </label>
+                <input
+                  className="form-control"
+                  name="fecha"
+                  type={'date'}
+                  onChange={this.handleChange}
+                  value={this.state.form && this.state.form.fecha}
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <label>
+                  Encargado:
+                </label>
+                <input
+                  className="form-control"
+                  name="encargado"
+                  type="text"
+                  onChange={this.handleChange}
+                  value={this.state.form && this.state.form.encargado}
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <label>
+                  Id.Cliente:
+                </label>
+                <input
+                  className="form-control"
+                  name="idcliente"
+                  type="number"
+                  onChange={this.handleChange}
+                  value={this.state.form && this.state.form.idcliente}
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <label>
+                  Nombre.Cliente:
+                </label>
+                <input
+                  className="form-control"
+                  name="nombrecliente"
+                  type="text"
+                  onChange={this.handleChange}
+                  value={this.state.form && this.state.form.nombrecliente}
+                />
+              </FormGroup>
+
+
+              { //aqui va las listas de todos los productos
+              }
+              <FormGroup>
+                <MaterialTable
+
+                  columns={[
+                    {
+                      title: "Id producto",
+                      field: "id_producto"
+                    },
+                    {
+                      title: "Descripción",
+                      field: "descripcion"
+                    },
+                    {
+                      title: "Valor unitario",
+                      field: "valor_unitario"
+                    },
+                    {
+                      title: "Estado",
+                      field: "estado"
+                    }
+
+
+                  ]}
+                  data={Object.keys(this.state.todosLosProductos).map(i => {
+                    return {
+                      id: i,
+                      id_producto: this.state.todosLosProductos[i].id_producto,
+                      descripcion: this.state.todosLosProductos[i].descripcion,
+                      valor_unitario: this.state.todosLosProductos[i].valor_unitario,
+                      estado: this.state.todosLosProductos[i].estado
+                    }
+                  })}
+                  title="Lista de productos"
+                  icons={tableIcons}
+                  actions={[
+                    {
+                      icon: Add,
+                      tooltip: 'Añadir producto',
+                      onClick: (event, rowData) => this.añadirProducto(rowData.id, rowData.id_producto, rowData.descripcion, rowData.valor_unitario, rowData.estado)
+                    }
+                  ]}
+                  options={{
+                    actionsColumnIndex: -1,
+                    pageSize: 5,
+                    pageSizeOptions: [5, 10, 20, 30, 40, 50],
+                    search: true,
+                    paging: true,
+                    sorting: true,
+                    cellStyle: {
+                      padding: "4px",
+                      border: "1px solid #e1e1e1",
+                      fontSize: "14px"
+                    },
+                    headerStyle: {
+                      backgroundColor: '#01579b',
+                      fontSize: "12px",
+                      color: '#FFF',
+                      padding: "8px"
+                    },
+                    searchFieldStyle: {
+                      fontSize: "14px"
+                    }
+
+
+                  }}
+                  localization={{
+                    header: {
+                      actions: "Acciones"
+                    }
+                  }}
+
+                />
+              </FormGroup>
+
+              {//Este es el carrito
+              }
+              <FormGroup>
+                <MaterialTable
+
+                  columns={[
+                    {
+                      title: "Id producto",
+                      field: "id_producto"
+                    },
+                    {
+                      title: "Descripción",
+                      field: "descripcion"
+                    },
+                    {
+                      title: "Valor unitario",
+                      field: "valor_unitario"
+                    },
+                    {
+                      title: "Cantidad",
+                      field: "cantidad"
+                    }
+
+
+                  ]}
+                  data={Object.keys(this.state.form.listaproductos).map(i => {
+                    return {
+                      id: i,
+                      id_producto: this.state.form.listaproductos[i].id_producto,
+                      descripcion: this.state.form.listaproductos[i].descripcion,
+                      valor_unitario: this.state.form.listaproductos[i].valor_unitario,
+                      cantidad: this.state.form.listaproductos[i].cantidad
+                    }
+                  })}
+                  title="Lista de productos"
+                  icons={tableIcons}
+                  actions={[
+                    {
+                      icon: Delete,
+                      tooltip: 'Eliminar Producto',
+                      onClick: (event, rowData) => this.eliminarProducto(rowData.id_producto)
+                    }
+                  ]}
+                  options={{
+                    actionsColumnIndex: -1,
+                    pageSize: 5,
+                    pageSizeOptions: [5, 10, 20, 30, 40, 50],
+                    search: true,
+                    paging: true,
+                    sorting: true,
+                    cellStyle: {
+                      padding: "4px",
+                      border: "1px solid #e1e1e1",
+                      fontSize: "14px"
+                    },
+                    headerStyle: {
+                      backgroundColor: '#01579b',
+                      fontSize: "12px",
+                      color: '#FFF',
+                      padding: "8px"
+                    },
+                    searchFieldStyle: {
+                      fontSize: "14px"
+                    }
+
+
+                  }}
+                  localization={{
+                    header: {
+                      actions: "Acciones"
+                    }
+                  }}
+
+                />
+              </FormGroup>
+
+
+              <FormGroup>
+                <label>
+                  Total Venta:
+                </label>
+                <input
+                  className="form-control"
+                  name="totalventa"
+                  type="number"
+                  onChange={this.handleChange}
+                  value={this.state.form && this.state.form.totalventa}
+                />
+              </FormGroup>
+
+
+              <FormGroup>
+                <label>
+                  Estado:
+                </label>
+                <select className="form-select" name="estado" value={this.state.form && this.state.form.estado} onChange={this.handleChange}>
+                  <option value={this.state.form.estado}>{this.state.form.estado}</option>
+                  {optionsEstado.map((option) => (
+                    <option value={option.value}>{option.label}</option>
+                  ))}
+                </select>
+              </FormGroup>
+
+            </ModalBody>
+
+            <ModalFooter>
+
+              <Button
+                color="primary"
+                onClick={() => this.peticionPut()}
+              >
+                Editar
+              </Button>
+              <Button
+                color="danger"
+                onClick={() => this.setState({ modalEditar: false })}
+              >
+                Cancelar
+              </Button>
+
+            </ModalFooter>
+
+          </Modal>
+
+
+
+        </>
+      </>
+    );
+  }
+}
+export default Ventas;
