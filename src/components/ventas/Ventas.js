@@ -2,28 +2,17 @@ import React, { Component } from 'react';
 import Navigation from '../globals/Navigation';
 import './Ventas.css';
 import "bootstrap/dist/css/bootstrap.min.css";
-import Productos from '../productos/Productos';
 
-import {
-  Button,
-  Container,
-  Modal,
-  ModalHeader,
-  ModalBody,
-  FormGroup,
-  ModalFooter,
-} from "reactstrap";
+import { Button, Container, Modal, ModalHeader, ModalBody, FormGroup, ModalFooter } from "reactstrap";
 
 import fireDb from '../../firebase';
 
 import MaterialTable from "material-table";
 
-
 import { forwardRef } from 'react';
 
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-
 import ArrowDownward from '@material-ui/icons/ArrowDownward';
 import Check from '@material-ui/icons/Check';
 import ChevronLeft from '@material-ui/icons/ChevronLeft';
@@ -78,8 +67,6 @@ const optionsEstado = [
   }
 ]
 
-var count = 1;
-
 class Ventas extends Component {
   state = {
     data: [],
@@ -99,9 +86,7 @@ class Ventas extends Component {
     id: 0
   };
 
-
-
-
+  //Peticion a firestore para obtener la lista de productos
   peticionGetProductos = () => {
     fireDb.child("productos").on("value", (producto) => {
       if (producto.val() !== null) {
@@ -111,18 +96,7 @@ class Ventas extends Component {
       }
     });
   };
-
-
-
-
-
-
-
-
-
-
-
-
+  //peticion a firestore para obtener la lista de ventas
   peticionGet = () => {
     fireDb.child("ventas").on("value", (venta) => {
       if (venta.val() !== null) {
@@ -132,12 +106,13 @@ class Ventas extends Component {
       }
     });
   };
-
+  //peticion a firestore para enviar una venta
   peticionPost = () => {
     fireDb.child("ventas").push(this.state.form,
       error => {
         if (error) console.log(error)
       });
+    //reinicio  el form
     this.setState({
       form: {
         idventa: "",
@@ -152,7 +127,7 @@ class Ventas extends Component {
       modalInsertar: false
     });
   }
-
+  //peticion a firestore para modificar una venta
   peticionPut = () => {
     fireDb.child(`ventas/${this.state.id}`).set(
       this.state.form,
@@ -161,7 +136,7 @@ class Ventas extends Component {
       });
     this.setState({ modalEditar: false });
   }
-
+  //peticion a firestore para borrar una venta
   peticionDelete = () => {
     if (window.confirm(`Estás seguro que deseas eliminar la venta ${this.state.form && this.state.form.idventa}?`)) {
       fireDb.child(`ventas/${this.state.id}`).remove(
@@ -169,6 +144,7 @@ class Ventas extends Component {
           if (error) console.log(error)
         });
     }
+    //reinicio  el form
     this.setState({
       form: {
         idventa: "",
@@ -183,7 +159,7 @@ class Ventas extends Component {
       modalInsertar: false
     });
   }
-
+  //manejador cuando ocurre algun cambio en un campo del formulario que guarda el cambio
   handleChange = e => {
     this.setState({
       form: {
@@ -193,7 +169,7 @@ class Ventas extends Component {
     })
     console.log(this.state.form);
   }
-
+  //al seleccionar una venta puede enviarte a editar o a eliminar
   seleccionarVenta = async (venta, caso) => {
 
     await this.setState({ form: venta, id: venta.id });
@@ -202,7 +178,7 @@ class Ventas extends Component {
       this.peticionDelete()
 
   }
-
+  //este metodo recorre la matriz de productos buscando el producto existente con su id, si lo encuentra devuelve true
   bolean = (idProducto) => {
     var resultado = true;
     for (var i = 0; i < this.state.form.listaproductos.length; i++) {
@@ -213,7 +189,7 @@ class Ventas extends Component {
     }
     return resultado
   }
-
+  //este metodo añade un producto a form
   añadirProducto = (id, idProducto, descripcion, precio, estado) => {
     //Se añade solo si el producto esta disponible
     if (estado === "Disponible") {
@@ -261,7 +237,7 @@ class Ventas extends Component {
           }
         })
       }
-      //cuando el array tiene al menos un producto y voy a agregar un mismo producto que ya tengo, se modifica la cantidad
+      //cuando el array tiene al menos un producto y voy a agregar un mismo producto que ya tengo, crece la cantidad
       else {
         //Aqui buscare el id de la matrix que tiene el producto
         var index = 0;
@@ -282,7 +258,7 @@ class Ventas extends Component {
       }
     }
   }
-
+  //aqui elimino un producto
   eliminarProducto = (idProducto) => {
     const listaProductos = this.state.form.listaproductos;
     this.setState({
@@ -295,18 +271,18 @@ class Ventas extends Component {
       }
     })
   }
-
+  //este metodo se ejecuta si hay algun cambio o modificacion
   componentDidMount() {
     this.peticionGet();
     this.peticionGetProductos();
   }
-
 
   render() {
     return (
       <>
         <Navigation />
         <>
+
           <Container className="mt-5 contenedor contenedor-Ventas">
             <h1>Ventas</h1>
             <br />
@@ -314,8 +290,13 @@ class Ventas extends Component {
             <br />
             <br />
 
-            <MaterialTable
+            {
+              //****************************************************/
+              ////////////////////LISTA PRINCPAL/////////////////////
+              //****************************************************/
+            }
 
+            <MaterialTable
               columns={[
                 {
                   title: "Id venta",
@@ -414,6 +395,12 @@ class Ventas extends Component {
 
           </Container>
 
+          {
+            //****************************************************/
+            ////////////////////MODAL AÑADIR VENTA/////////////////
+            //****************************************************/
+          }
+
           <Modal className="modal-Ventas" isOpen={this.state.modalInsertar}>
 
             <ModalHeader>
@@ -481,10 +468,13 @@ class Ventas extends Component {
                   type="text"
                   onChange={this.handleChange}
                 />
-
-                {//Esto es toda la lista de productos 
-                }
               </FormGroup>
+
+              {
+                //****************************************************/
+                ////////////////////LISTA PRODUCTOS////////////////////
+                //****************************************************/
+              }
               <FormGroup>
                 <MaterialTable
 
@@ -558,8 +548,10 @@ class Ventas extends Component {
 
                 />
               </FormGroup>
-
-              {//Este es el carrito
+              {
+                //****************************************************/
+                ////////////////////CARRITO PRODUCTOS//////////////////
+                //****************************************************/
               }
               <FormGroup>
                 <MaterialTable
@@ -763,7 +755,10 @@ class Ventas extends Component {
               </FormGroup>
 
 
-              { //aqui va las listas de todos los productos
+              {
+                //****************************************************/
+                ////////////////////LISTA PRODUCTOS////////////////////
+                //****************************************************/
               }
               <FormGroup>
                 <MaterialTable
@@ -839,7 +834,10 @@ class Ventas extends Component {
                 />
               </FormGroup>
 
-              {//Este es el carrito
+              {
+                //****************************************************/
+                ////////////////////CARRITO PRODUCTOS//////////////////
+                //****************************************************/
               }
               <FormGroup>
                 <MaterialTable
