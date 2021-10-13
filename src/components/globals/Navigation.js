@@ -9,6 +9,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import './Navigation.css'
 import logomenu from '../img/logomenu.png'
 
+
+
 export default class Navigation extends Component {
     render() {
         return (
@@ -23,7 +25,8 @@ export default class Navigation extends Component {
                     <li><Link to="/ventas">Ventas</Link></li>
                     <li><Link to="/productos">Productos</Link></li>
                     <li><Link to="/usuarios">Usuarios</Link></li>
-                    <li><Link to="/login"><FontAwesomeIcon icon={faSignInAlt} /></Link></li>
+                    <li><Link to="/profile">Mi perfil</Link></li>
+                    <li><Link to="/logout">Cerrar sesión</Link></li>
                     </ul>
                  </div>
             </nav>
