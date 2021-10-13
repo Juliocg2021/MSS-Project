@@ -263,11 +263,18 @@ class Ventas extends Component {
     const listaProductos = this.state.form.listaproductos;
     this.setState({
       form: {
+        idventa: this.state.form.idventa,
+        fecha: this.state.form.fecha,
+        encargado: this.state.form.encargado,
+        idcliente: this.state.form.idcliente,
+        nombrecliente: this.state.form.nombrecliente,
         listaproductos: listaProductos.filter(
           (producto) => {
             return producto.id_producto !== idProducto
           }
-        )
+        ),
+        totalventa: this.state.form.totalventa,
+        estado: this.state.form.estado
       }
     })
   }
