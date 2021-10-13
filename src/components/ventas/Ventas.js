@@ -134,7 +134,18 @@ class Ventas extends Component {
       error => {
         if (error) console.log(error)
       });
-    this.setState({ modalEditar: false });
+    this.setState({ 
+      form: {
+        idventa: "",
+        fecha: "",
+        encargado: "",
+        idcliente: "",
+        nombrecliente: "",
+        listaproductos: [],
+        totalventa: "",
+        estado: ""
+      },
+      modalEditar: false });
   }
   //peticion a firestore para borrar una venta
   peticionDelete = () => {
@@ -666,6 +677,7 @@ class Ventas extends Component {
               <Button
                 color="primary"
                 onClick={() => this.peticionPost()}
+                type="submit"
               >
                 Insertar
               </Button>
@@ -959,7 +971,18 @@ class Ventas extends Component {
               </Button>
               <Button
                 color="danger"
-                onClick={() => this.setState({ modalEditar: false })}
+                onClick={() => this.setState({ 
+                  form: {
+                    idventa: "",
+                    fecha: "",
+                    encargado: "",
+                    idcliente: "",
+                    nombrecliente: "",
+                    listaproductos: [],
+                    totalventa: "",
+                    estado: ""
+                  },
+                  modalEditar: false })}
               >
                 Cancelar
               </Button>
