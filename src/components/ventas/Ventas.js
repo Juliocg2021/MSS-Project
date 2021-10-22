@@ -30,7 +30,8 @@ import ViewColumn from '@material-ui/icons/ViewColumn';
 import Add from '@material-ui/icons/Add';
 import Delete from '@material-ui/icons/Delete';
 import { ThreeDRotationSharp } from '@material-ui/icons';
-
+import { useAuth0 } from "@auth0/auth0-react";
+import Profile from "../login/Profile";
 
 const tableIcons = {
   Check: forwardRef((props, ref) => <Check {...props} ref={ref} />),
@@ -67,16 +68,20 @@ const optionsEstado = [
   }
 ]
 
+
+
 class Ventas extends Component {
   state = {
+    arrayUsuarios: false,
     data: [],
     todosLosProductos: [],
+    todosLosUsuarios: [],
     modalEditar: false,
     modalInsertar: false,
     form: {
       idventa: "",
       fecha: "",
-      encargado: "",
+      encargado: "user.name",
       idcliente: "",
       nombrecliente: "",
       listaproductos: [],
@@ -85,7 +90,7 @@ class Ventas extends Component {
     },
     id: 0
   };
-
+  
   //Peticion a firestore para obtener la lista de productos
   peticionGetProductos = () => {
     fireDb.child("productos").on("value", (producto) => {
@@ -106,6 +111,39 @@ class Ventas extends Component {
       }
     });
   };
+  //peticion a firestore para obtner la lista de usuarios:
+
+  peticionGetUsuarios = () => {
+
+    fireDb.child("usuarios").on("value",
+      (usuario) => {
+        if (usuario.val() !== null) {
+          this.setState({ ...this.state.todosLosUsuarios, todosLosUsuarios: usuario.val() });
+        } else {
+          this.setState({ todosLosUsuarios: [] });
+        }
+      });
+
+
+
+  }
+
+  getUsuarios = () => {
+    fetch("https://mss-project-e15ef-default-rtdb.firebaseio.com/usuarios.json", { method: "get" })
+      .then(
+        json => {
+          let usuarios = [];
+        }
+      ).catch(
+        error => { window.alert(error) }
+      )
+  }
+
+
+
+
+
+
   //peticion a firestore para enviar una venta
   peticionPost = () => {
     fireDb.child("ventas").push(this.state.form,
@@ -134,7 +172,7 @@ class Ventas extends Component {
       error => {
         if (error) console.log(error)
       });
-    this.setState({ 
+    this.setState({
       form: {
         idventa: "",
         fecha: "",
@@ -145,7 +183,8 @@ class Ventas extends Component {
         totalventa: "",
         estado: ""
       },
-      modalEditar: false });
+      modalEditar: false
+    });
   }
   //peticion a firestore para borrar una venta
   peticionDelete = () => {
@@ -290,12 +329,56 @@ class Ventas extends Component {
     })
   }
   //este metodo se ejecuta si hay algun cambio o modificacion
+
+  obtenerArrayUsuarios() {
+    return new Promise(
+      (resolve, reject) => {
+        setTimeout(
+          () => {
+            if (Object.keys(this.state.todosLosUsuarios.length) > 0) {
+              resolve(Object.keys(this.state.todosLosUsuarios.length));
+            }
+            else {
+              reject(new Error("no se pudo obtener el array"))
+            }
+          }, 1000);
+      }
+    );
+  }
+
+  cargar() {
+    let optionUsuarios = [];
+    let arrayUsuarios = Object.keys(this.state.todosLosUsuarios).map(i => {
+      return {
+        nombre: this.state.todosLosUsuarios[i].nombre,
+      }
+    })
+    arrayUsuarios.forEach(
+      (usuario) => {
+        optionUsuarios.push({
+          label: `${usuario.nombre}`,
+          valor: `${usuario.nombre}`
+        }
+        )
+      }
+    );
+    //this.state.arrayUsuarios = false;
+    return optionUsuarios.map((option) => (
+      <option value={option.value}>{option.label}</option>
+    ));
+
+  }
+
+
   componentDidMount() {
     this.peticionGet();
     this.peticionGetProductos();
+    this.peticionGetUsuarios();
   }
 
   render() {
+    
+
     return (
       <>
         <Navigation />
@@ -457,12 +540,12 @@ class Ventas extends Component {
                 <label>
                   Encargado:
                 </label>
-                <input
-                  className="form-control"
-                  name="encargado"
-                  type="text"
-                  onChange={this.handleChange}
-                />
+                <select className="form-select" name="encargado" onChange={this.handleChange}>
+                  {
+                    //this.cargar()
+                    <option value={this.state.form.encargado}>{this.state.form.encargado}</option>
+                  }
+                </select>
               </FormGroup>
 
               <FormGroup>
@@ -738,14 +821,17 @@ class Ventas extends Component {
                 <label>
                   Encargado:
                 </label>
-                <input
-                  className="form-control"
-                  name="encargado"
-                  type="text"
-                  onChange={this.handleChange}
-                  value={this.state.form && this.state.form.encargado}
-                />
+                <select className="form-select" name="encargado" onChange={this.handleChange} value={this.state.form && this.state.form.encargado}>
+                  {
+                    //this.cargar()
+                    <option value={this.state.form.encargado}>{this.state.form.encargado}</option>
+                  }
+                </select>
               </FormGroup>
+
+              {
+                ///
+              }
 
               <FormGroup>
                 <label>
@@ -971,7 +1057,7 @@ class Ventas extends Component {
               </Button>
               <Button
                 color="danger"
-                onClick={() => this.setState({ 
+                onClick={() => this.setState({
                   form: {
                     idventa: "",
                     fecha: "",
@@ -982,7 +1068,8 @@ class Ventas extends Component {
                     totalventa: "",
                     estado: ""
                   },
-                  modalEditar: false })}
+                  modalEditar: false
+                })}
               >
                 Cancelar
               </Button>
