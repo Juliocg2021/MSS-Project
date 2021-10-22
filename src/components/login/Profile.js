@@ -28,7 +28,8 @@ const Profile = () => {
             <p>Fecha de actualización: {user.updated_at}</p>
             
         </div>
-        
+      
+      
     </>
 
   );
