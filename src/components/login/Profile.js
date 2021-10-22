@@ -1,23 +1,32 @@
 
-import React, { Component } from 'react'
+import React from 'react'
 import { useAuth0 } from "@auth0/auth0-react";
 import Navigation from '../globals/Navigation'
 
-import JSONPretty from "react-json-pretty";
+
 import "react-json-pretty/themes/monikai.css";
 
 const Profile = () => {
-  const { user, isAuthenticated } = useAuth0();
+  const { user} = useAuth0();
+
+  const { given_name, family_name, nickname, email, picture, sub, updated_at} = user;
  
   return (
     <>
         <Navigation />
-        <div className="container">
-            <h1>Profile</h1>
-            <img src={user.picture} alt={user.name} />
-            <h2>{user.name}</h2>
-            <p>{user.email}</p>
-            <JSONPretty data={user} />;
+        <div className="contenedor">
+            <h1>Mi perfil</h1>
+            <img
+            src={user.picture}
+            alt="Profile"
+            className="rounded-circle img-fluid profile-picture mb-3 mb-md-0"
+            />
+            <h2 className ="mb-3">{user.name}</h2>
+            <p>Nombre de usuario: {user.nickname}</p>
+            <p>Email: {user.email}</p>
+            <p>ID: {user.sub}</p>
+            <p>Fecha de actualización: {user.updated_at}</p>
+            
         </div>
         
     </>

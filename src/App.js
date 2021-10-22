@@ -1,7 +1,6 @@
 import React from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css'
-import { BrowserRouter as Router, Route } from 'react-router-dom'
-import './App.css';
+import { Route, Switch, BrowserRouter } from 'react-router-dom';
+import { useAuth0 } from '@auth0/auth0-react';
 
 import Inicio from './components/inicio/Inicio'
 import Productos from './components/productos/Productos'
@@ -10,44 +9,38 @@ import Usuarios from './components/usuarios/Usuarios'
 import Login from './components/login/Login'
 import Logout from './components/login/Logout'
 import Profile from './components/login/Profile'
+import ProtectedRoute from './auth/protected-route';
 
-import { useAuth0 } from "@auth0/auth0-react";
+import Loading from './components/login/Loading';
 
-function App() {
+import 'bootstrap/dist/css/bootstrap.min.css'
 
-  const { isAuthenticated, isLoading } = useAuth0();
-  
+import './App.css';
+
+const App = () => {
+  const { isLoading } = useAuth0();
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
   return (
-    <Router>
-      <div className="">
-        {isAuthenticated ? 
-
-        <div className="">
-          <Route exact path="/" component={Inicio} />
-          <Route exact path="/productos" component={Productos} />
-          <Route exact path="/ventas" component={Ventas} />
-          <Route exact path="/usuarios" component={Usuarios} />
-          <Route exact path="/logout" component={Logout} />
-          <Route exact path="/profile" component={Profile} />
-        </div>
-
-        :
-
-        <div className="">
-          <Route exact path="/" component={Login} />
-          <Route exact path="/productos" component={Login} />
-          <Route exact path="/ventas" component={Login} />
-          <Route exact path="/usuarios" component={Login} />
-          <Route exact path="/logout" component={Login} />
-          <Route exact path="/profile" component={Login} />
-
-        </div>
-
-        }
-
+    <div id="app" >
+      <div>
+      <BrowserRouter>
+          <Switch>
+            <ProtectedRoute exact path="/" component={Inicio} />
+            <ProtectedRoute path="/ventas" component={Ventas} />
+            <ProtectedRoute path="/productos" component={Productos} />
+            <ProtectedRoute path="/usuarios" component={Usuarios} />
+            <ProtectedRoute path="/profile" component={Profile} />
+            <ProtectedRoute path="/logout" component={Logout} />
+            <Route path="/login" component={Login} />
+          </Switch>
+      </BrowserRouter>
       </div>
-    </Router>
+    </div>
   );
-}
+};
 
 export default App;
