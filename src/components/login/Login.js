@@ -1,5 +1,5 @@
-import React, { Component } from 'react'
-import { Link } from 'react-router-dom'
+import React from 'react'
+
 
 import logoLogin from '../img/logologin.png'
 import './Login.css'

@@ -9,7 +9,7 @@ import "react-json-pretty/themes/monikai.css";
 const Profile = () => {
   const { user} = useAuth0();
 
-  const { given_name, family_name, nickname, email, picture, sub, updated_at} = user;
+ 
  
   return (
     <>

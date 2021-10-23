@@ -29,9 +29,12 @@ import Search from '@material-ui/icons/Search';
 import ViewColumn from '@material-ui/icons/ViewColumn';
 import Add from '@material-ui/icons/Add';
 import Delete from '@material-ui/icons/Delete';
-import { ThreeDRotationSharp } from '@material-ui/icons';
-import { useAuth0 } from "@auth0/auth0-react";
-import Profile from "../login/Profile";
+
+
+import { withAuth0 } from '@auth0/auth0-react';
+
+
+
 
 const tableIcons = {
   Check: forwardRef((props, ref) => <Check {...props} ref={ref} />),
@@ -111,38 +114,7 @@ class Ventas extends Component {
       }
     });
   };
-  //peticion a firestore para obtner la lista de usuarios:
-
-  peticionGetUsuarios = () => {
-
-    fireDb.child("usuarios").on("value",
-      (usuario) => {
-        if (usuario.val() !== null) {
-          this.setState({ ...this.state.todosLosUsuarios, todosLosUsuarios: usuario.val() });
-        } else {
-          this.setState({ todosLosUsuarios: [] });
-        }
-      });
-
-
-
-  }
-
-  getUsuarios = () => {
-    fetch("https://mss-project-e15ef-default-rtdb.firebaseio.com/usuarios.json", { method: "get" })
-      .then(
-        json => {
-          let usuarios = [];
-        }
-      ).catch(
-        error => { window.alert(error) }
-      )
-  }
-
-
-
-
-
+ 
 
   //peticion a firestore para enviar una venta
   peticionPost = () => {
@@ -330,54 +302,16 @@ class Ventas extends Component {
   }
   //este metodo se ejecuta si hay algun cambio o modificacion
 
-  obtenerArrayUsuarios() {
-    return new Promise(
-      (resolve, reject) => {
-        setTimeout(
-          () => {
-            if (Object.keys(this.state.todosLosUsuarios.length) > 0) {
-              resolve(Object.keys(this.state.todosLosUsuarios.length));
-            }
-            else {
-              reject(new Error("no se pudo obtener el array"))
-            }
-          }, 1000);
-      }
-    );
-  }
-
-  cargar() {
-    let optionUsuarios = [];
-    let arrayUsuarios = Object.keys(this.state.todosLosUsuarios).map(i => {
-      return {
-        nombre: this.state.todosLosUsuarios[i].nombre,
-      }
-    })
-    arrayUsuarios.forEach(
-      (usuario) => {
-        optionUsuarios.push({
-          label: `${usuario.nombre}`,
-          valor: `${usuario.nombre}`
-        }
-        )
-      }
-    );
-    //this.state.arrayUsuarios = false;
-    return optionUsuarios.map((option) => (
-      <option value={option.value}>{option.label}</option>
-    ));
-
-  }
 
 
   componentDidMount() {
     this.peticionGet();
     this.peticionGetProductos();
-    this.peticionGetUsuarios();
   }
 
   render() {
-    
+
+      const { user } = this.props.auth0;
 
     return (
       <>
@@ -521,6 +455,8 @@ class Ventas extends Component {
                   type="number"
                   name="idventa"
                   onChange={this.handleChange}
+        
+
                 />
               </FormGroup>
 
@@ -540,12 +476,16 @@ class Ventas extends Component {
                 <label>
                   Encargado:
                 </label>
-                <select className="form-select" name="encargado" onChange={this.handleChange}>
-                  {
-                    //this.cargar()
-                    <option value={this.state.form.encargado}>{this.state.form.encargado}</option>
-                  }
+                <select
+                  className="form-select"
+                  name="encargado"
+                  onChange={this.handleChange}
+                >
+                  <option value="">Seleccione un encargado</option>
+                  <option key={user.name} value={user.name}>{user.name}</option>
+
                 </select>
+
               </FormGroup>
 
               <FormGroup>
@@ -821,12 +761,15 @@ class Ventas extends Component {
                 <label>
                   Encargado:
                 </label>
-                <select className="form-select" name="encargado" onChange={this.handleChange} value={this.state.form && this.state.form.encargado}>
-                  {
-                    //this.cargar()
-                    <option value={this.state.form.encargado}>{this.state.form.encargado}</option>
-                  }
-                </select>
+                <input
+                  className="form-control"
+                  name="encargado"
+                  type="text"
+                  onChange={this.handleChange}
+                  value={this.state.form && this.state.form.encargado}
+                  disabled
+                />
+                
               </FormGroup>
 
               {
@@ -1085,4 +1028,4 @@ class Ventas extends Component {
     );
   }
 }
-export default Ventas;
+export default withAuth0(Ventas);
